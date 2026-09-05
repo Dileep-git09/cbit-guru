@@ -1,0 +1,124 @@
+// Every backend call funnels through this one module — components never call
+// fetch() directly, so the API surface has exactly one place to change if a
+// route or auth scheme changes.
+const BASE = import.meta.env.VITE_API_BASE || '/api'
+
+const TOKEN_KEY = 'cbit_guru_admin_token'
+
+export const auth = {
+  get: () => localStorage.getItem(TOKEN_KEY),
+  set: (t) => localStorage.setItem(TOKEN_KEY, t),
+  clear: () => localStorage.removeItem(TOKEN_KEY),
+}
+
+async function handle(res) {
+  if (!res.ok) {
+    let detail = res.statusText
+    try {
+      detail = (await res.json()).detail || detail
+    } catch { /* non-JSON error body */ }
+    throw new Error(detail)
+  }
+  return res.json()
+}
+
+function adminHeaders(extra = {}) {
+  return { Authorization: `Bearer ${auth.get()}`, ...extra }
+}
+
+export const api = {
+  health: () => fetch(`${BASE}/health`).then(handle),
+
+  chat: (message, history = []) =>
+    fetch(`${BASE}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, history }),
+    }).then(handle),
+
+  /**
+   * Streaming chat over SSE.
+   * onMeta({sources, images, grounded}) fires once, then onToken(text) repeatedly.
+   * Parses the raw SSE wire format manually (event: / data: lines separated
+   * by blank lines) since the browser's built-in EventSource API only
+   * supports GET requests, and this needs to POST a JSON body.
+   */
+  chatStream: async (message, history, { onMeta, onToken, onDone, onError }) => {
+    const res = await fetch(`${BASE}/chat/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, history }),
+    })
+    if (!res.ok || !res.body) {
+      onError?.(new Error(`Stream failed (${res.status})`))
+      return
+    }
+
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+
+      // SSE frames are separated by a blank line; the last split() piece may
+      // be a partial frame still arriving, so it's kept in `buffer` for the
+      // next chunk instead of being parsed prematurely.
+      const frames = buffer.split('\n\n')
+      buffer = frames.pop() || ''
+
+      for (const frame of frames) {
+        const evLine = frame.split('\n').find((l) => l.startsWith('event: '))
+        const dataLine = frame.split('\n').find((l) => l.startsWith('data: '))
+        if (!evLine || !dataLine) continue
+        const event = evLine.slice(7).trim()
+        let payload = {}
+        try { payload = JSON.parse(dataLine.slice(6)) } catch { continue }
+
+        if (event === 'meta') onMeta?.(payload)
+        else if (event === 'token') onToken?.(payload.t)
+        else if (event === 'error') onError?.(new Error(payload.detail))
+        else if (event === 'done') onDone?.()
+      }
+    }
+    onDone?.()
+  },
+
+  login: (email, password) =>
+    fetch(`${BASE}/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    }).then(handle),
+
+  stats: () => fetch(`${BASE}/admin/stats`, { headers: adminHeaders() }).then(handle),
+
+  browse: (limit = 250) =>
+    fetch(`${BASE}/admin/browse?limit=${limit}`, { headers: adminHeaders() }).then(handle),
+
+  ingestText: (text, source_name) =>
+    fetch(`${BASE}/admin/ingest/text`, {
+      method: 'POST',
+      headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ text, source_name }),
+    }).then(handle),
+
+  ingestUrl: (url) =>
+    fetch(`${BASE}/admin/ingest/url`, {
+      method: 'POST',
+      headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ url }),
+    }).then(handle),
+
+  ingestFile: (file) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    return fetch(`${BASE}/admin/ingest/file`, {
+      method: 'POST',
+      headers: adminHeaders(),   // no Content-Type here — the browser sets the multipart boundary itself
+      body: fd,
+    }).then(handle)
+  },
+}
