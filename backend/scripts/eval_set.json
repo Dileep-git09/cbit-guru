@@ -1,0 +1,12 @@
+[
+  { "question": "Where is CBIT located?",              "must_contain": ["gandipet", "hyderabad"] },
+  { "question": "What courses does CBIT offer in AI and Data Science?", "must_contain": ["artificial intelligence", "data science"] },
+  { "question": "Who is the principal of CBIT?",        "must_contain": ["principal"] },
+  { "question": "Tell me about the hostel facilities",  "must_contain": ["hostel"] },
+  { "question": "What is the admission process?",       "must_contain": ["admission", "eamcet"] },
+  { "question": "CBIT kaha par hai?",                   "must_contain": ["hyderabad", "gandipet"] },
+  { "question": "CBIT ఎక్కడ ఉంది?",                     "must_contain": ["హైదరాబాద్", "hyderabad"] },
+  { "question": "What are the placement statistics?",   "must_contain": ["placement"] },
+  { "question": "When is Sruthi fest held?",            "must_contain": ["sruthi"] },
+  { "question": "Which departments are there at CBIT?", "must_contain": ["department"] }
+]
