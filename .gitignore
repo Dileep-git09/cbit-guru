@@ -1,0 +1,28 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# --- Secrets: NEVER commit real keys ---
+backend/.env
+
+# --- Regenerable data (scraper output) ---
+backend/data/text_content/*
+backend/data/pdfs/*
+!backend/data/**/.gitkeep
+# keep the image manifest layout but not the downloaded binaries
+backend/data/images/*
+!backend/data/images/manifest.json
+
+# --- Node / frontend ---
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

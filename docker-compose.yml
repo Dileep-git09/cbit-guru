@@ -1,0 +1,13 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    container_name: cbit-qdrant
+    ports:
+      - "6333:6333"   # REST API + web dashboard at http://localhost:6333/dashboard
+      - "6334:6334"   # gRPC (faster client protocol; optional)
+    volumes:
+      - qdrant_storage:/qdrant/storage   # persist vectors across restarts
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage:
