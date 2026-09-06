@@ -26,6 +26,7 @@ import sys
 # test must never touch). setdefault so a real .env is still respected if
 # someone deliberately sets QDRANT_URL etc. beforehand.
 os.environ.setdefault("QDRANT_URL", ":memory:")
+os.environ.setdefault("ADMIN_DB_FILE", ":memory:")
 os.environ.setdefault("GEMINI_API_KEY", "fake")
 os.environ.setdefault("COHERE_API_KEY", "fake")
 os.environ.setdefault("ADMIN_EMAIL", "admin@cbit.ac.in")
@@ -177,6 +178,55 @@ async def main() -> None:
         r = client.get("/api/admin/browse?limit=10", headers=hdr)
         check("GET /api/admin/browse", r.status_code == 200,
               f"{len(r.json().get('items', []))} rows")
+
+        # --- multi-admin auth: roles, user management, password changes ---
+        r = client.get("/api/admin/me", headers=hdr)
+        check("GET /api/admin/me reports superadmin", r.status_code == 200
+              and r.json().get("role") == "superadmin")
+
+        r = client.post("/api/admin/users", headers=hdr,
+                         json={"email": "staff@cbit.ac.in", "password": "staffpass123", "role": "admin"})
+        check("Superadmin creates a new admin user", r.status_code == 201, r.json().get("id", "")[:8])
+        staff_id = r.json()["id"]
+
+        r = client.post("/api/admin/login",
+                         json={"email": "staff@cbit.ac.in", "password": "staffpass123"})
+        check("New admin can log in", r.status_code == 200)
+        staff_hdr = {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+        r = client.post("/api/admin/users", headers=staff_hdr,
+                         json={"email": "x@x.com", "password": "whatever1", "role": "admin"})
+        check("Plain admin blocked from creating users", r.status_code == 403)
+
+        r = client.get("/api/admin/users", headers=staff_hdr)
+        check("Plain admin blocked from listing users", r.status_code == 403)
+
+        r = client.get("/api/admin/users", headers=hdr)
+        check("Superadmin lists all users", r.status_code == 200 and len(r.json()) == 2,
+              f"{len(r.json())} user(s)")
+
+        r = client.patch("/api/admin/me/password", headers=staff_hdr,
+                          json={"current_password": "wrong", "new_password": "newpass1234"})
+        check("Password change rejects wrong current password", r.status_code == 401)
+
+        r = client.patch("/api/admin/me/password", headers=staff_hdr,
+                          json={"current_password": "staffpass123", "new_password": "newpass1234"})
+        check("Self password change succeeds", r.status_code == 200)
+
+        r = client.post("/api/admin/login",
+                         json={"email": "staff@cbit.ac.in", "password": "newpass1234"})
+        check("Login works with the new password", r.status_code == 200)
+
+        r = client.patch(f"/api/admin/users/{staff_id}/password", headers=hdr,
+                          json={"new_password": "resetbyroot1"})
+        check("Superadmin resets another user's password", r.status_code == 200)
+
+        r = client.delete(f"/api/admin/users/{staff_id}", headers=hdr)
+        check("Superadmin deletes the admin user", r.status_code == 200)
+
+        me = client.get("/api/admin/me", headers=hdr).json()
+        r = client.delete(f"/api/admin/users/{me['id']}", headers=hdr)
+        check("Deleting the last super admin is blocked", r.status_code == 400)
 
     failed = [n for n, ok, _ in results if not ok]
     print("\n" + "=" * 62)

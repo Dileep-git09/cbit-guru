@@ -66,7 +66,7 @@ python -c "import secrets; print(secrets.token_hex(32))"   # paste as JWT_SECRET
 uvicorn app.main:app --reload --port 8000
 
 # 3. Prove the wiring without burning quota
-python -m scripts.smoke_test                # expect 17/17 passed
+python -m scripts.smoke_test                # expect 29/29 passed
 
 # 4. Frontend (new terminal)
 cd frontend && npm install && npm run dev
@@ -174,9 +174,13 @@ Go to `/admin`, log in, and try all four tabs:
 - **URL** — paste a CBIT page URL.
 - **Browse Data** — confirm chunks appear with correct source pills.
 
-**Understand this today:** `security.py`. Why the admin route is JWT-protected
-and why `secrets.compare_digest` is used instead of `==` (timing attacks). An
-examiner asking "how did you secure it?" is a gift — have this answer ready.
+**Understand this today:** `security.py` + `services/users.py`. Why the admin
+route is JWT-protected, why passwords are hashed with bcrypt (via passlib)
+rather than compared or stored as plaintext, and why there are two roles —
+`admin` and `superadmin` — with only the latter able to create/reset/delete
+admin accounts (so one compromised or careless staff login can't be used to
+mint new admin accounts). An examiner asking "how did you secure it?" is a
+gift — have this answer ready.
 
 ---
 

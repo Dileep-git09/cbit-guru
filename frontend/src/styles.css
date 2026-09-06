@@ -287,6 +287,8 @@ td { padding: 9px; border-bottom: 1px solid #ffffff12; vertical-align: top; }
 .pill--web_scrape { background: #a855f733; color: #d8b4fe; }
 .pill--image      { background: #22c55e33; color: #86efac; }
 .pill--text       { background: #eab30833; color: #fde68a; }
+.pill--superadmin { background: #ec489933; color: #f9a8d4; }
+.pill--admin      { background: #6366f133; color: #a5b4fc; }
 
 .toast {
   position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);

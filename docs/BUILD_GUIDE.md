@@ -105,7 +105,7 @@ Frontend send()
 | Generator | Cohere `command-r` | Purpose-built for RAG grounding, cheap, strong multilingual support |
 | Backend | FastAPI | Async by default — many concurrent students without blocking; auto-generates OpenAPI docs |
 | Frontend | React + Vite | Component model suits chat history, streaming, voice, and an admin panel; Vite gives instant dev reload |
-| Auth | Single-admin JWT | The admin panel is an internal tool for CBIT staff, not multi-tenant — no user database needed, just a stateless signed token |
+| Auth | Multi-admin JWT + SQLite | Admin accounts (with a superadmin/admin role split) live in a small SQLite table — a real database, but a lightweight embedded one, since this is a handful of low-traffic structured records, not the core RAG data |
 | Web scraping | aiohttp + BeautifulSoup, Playwright fallback | Fast path for ordinary server-rendered pages; Playwright only kicks in for JS-rendered pages, so most of the crawl doesn't need a browser at all |
 
 ---
@@ -131,12 +131,12 @@ cbit-guru/
 │   │   ├── main.py               # FastAPI app entry point: CORS, lifespan, /api/health
 │   │   ├── config.py             # Settings loaded from .env — the single source of truth for every tunable
 │   │   ├── models.py             # Pydantic request/response schemas (the frontend<->backend contract)
-│   │   ├── security.py           # Admin JWT: login verification, token creation/validation
+│   │   ├── security.py           # JWT creation/validation, role dependencies (require_admin/require_superadmin)
 │   │   │
 │   │   ├── routers/
 │   │   │   ├── __init__.py
 │   │   │   ├── chat.py           # POST /api/chat and /api/chat/stream (SSE)
-│   │   │   └── admin.py          # login, ingest text/file/url, browse, stats, delete
+│   │   │   └── admin.py          # login, me, ingest text/file/url, browse, stats, delete, admin-user CRUD
 │   │   │
 │   │   └── services/             # the actual RAG logic, one concern per file
 │   │       ├── __init__.py
@@ -145,7 +145,11 @@ cbit-guru/
 │   │       ├── chunker.py        # HTML stripping, text cleaning, chunking with overlap
 │   │       ├── ingest.py         # unifies text/PDF/image/URL input into one storage schema
 │   │       ├── retriever.py      # question -> embed -> search -> context block
-│   │       └── llm.py            # Cohere generation, the grounding + multilingual system prompt
+│   │       ├── llm.py            # Cohere generation, the grounding + multilingual system prompt
+│   │       └── users.py          # SQLite-backed admin accounts: bcrypt hashes, roles, CRUD
+│   │
+│   ├── instance/
+│   │   └── admin.db              # SQLite admin-user table — gitignored, contains password hashes
 │   │
 │   ├── scraper/
 │   │   ├── __init__.py
@@ -153,7 +157,7 @@ cbit-guru/
 │   │
 │   ├── scripts/
 │   │   ├── __init__.py
-│   │   ├── smoke_test.py         # offline, zero-cost, 17-assertion pipeline check
+│   │   ├── smoke_test.py         # offline, zero-cost, 29-assertion pipeline check
 │   │   ├── ingest_all.py         # bulk-embed everything under data/ into Qdrant
 │   │   ├── evaluate.py           # retrieval hit-rate / answer accuracy / latency harness
 │   │   └── eval_set.json         # test questions with expected keywords
@@ -271,6 +275,57 @@ score threshold, `retriever.retrieve()` retries once *without* the threshold
 still forbids inventing facts, so the LLM will say "I don't have that
 information" rather than guess, even with weak context.
 
+### 5.3 Admin authentication — multi-user, role-based
+
+The admin panel started as a single hardcoded login in `.env`. It's now a
+real (if small) auth system, because a real institution needs more than one
+person able to manage the knowledge base, and needs some way to control who
+can grant that access in the first place.
+
+```
+Login request
+        │
+        ▼
+security.verify_admin()  → services/users.py verify_credentials()
+        │                    looks up the email in SQLite, then bcrypt-verifies
+        │                    the password against the stored hash — a match
+        │                    returns {id, email, role}, anything else returns
+        │                    None (the caller can't tell which part was wrong)
+        ▼
+security.create_token()  encodes {sub: id, email, role, exp} as a JWT
+        │
+        ▼
+Every protected route depends on require_admin (any valid admin JWT) or
+require_superadmin (require_admin, PLUS role == "superadmin")
+```
+
+**Two roles, one clear line:** `admin` can log in and use every ingestion/
+browse tool; only `superadmin` can create, list, reset the password of, or
+delete OTHER admin accounts (`routers/admin.py`'s `/users*` routes). A plain
+admin account being compromised or misused therefore can't be used to mint
+new admin accounts — the blast radius of one leaked login is capped.
+
+**Bootstrapping:** on the very first boot, `services/users.py`'s `init()`
+creates the `admin_users` SQLite table and, if it's empty, seeds exactly one
+`superadmin` row from `.env`'s `ADMIN_EMAIL`/`ADMIN_PASSWORD`. After that
+first boot, the database is authoritative — `.env`'s admin credentials are
+never read again. This means the very first login must use whatever's in
+`.env`, but every account after that is created *through the app itself*
+(the Admins tab, superadmin-only), not by editing config and restarting.
+
+**Self-service vs. override:** an admin changing their OWN password
+(`PATCH /admin/me/password`) must supply their current password — proof of
+identity, so a stolen-but-still-valid JWT can't be used to permanently lock
+the real owner out. A superadmin resetting SOMEONE ELSE's password
+(`PATCH /admin/users/{id}/password`) does NOT need that user's current
+password — the whole point is the target user may have forgotten it. Two
+different trust models for what looks like "the same" operation.
+
+**The lockout guard:** deleting an admin account checks
+`count_superadmins()` first — you cannot delete the last remaining
+superadmin, even as that superadmin, because that would leave the system
+with no account capable of ever creating another one.
+
 ---
 
 ## 6. Step-by-step: building it from scratch
@@ -376,7 +431,7 @@ correctly:
 cd backend
 python -m scripts.smoke_test
 ```
-Expect `17/17 checks passed`. This runs against an in-memory Qdrant with
+Expect `29/29 checks passed`. This runs against an in-memory Qdrant with
 fake embeddings/LLM — safe to run as often as you like.
 
 ### 8.2 Start the backend for real
@@ -509,8 +564,11 @@ below is a map to help you find the right file fast.
 | The system prompt / grounding rules / multilingual behaviour | `backend/app/services/llm.py` (`SYSTEM_PROMPT`) |
 | How images are turned into searchable text | `backend/app/services/ingest.py` (`image_to_text()`) |
 | What counts as "same site" during crawling, or the page budget | `backend/scraper/crawl.py` |
-| Admin login credentials or token lifetime | `backend/.env` (`ADMIN_EMAIL`, `ADMIN_PASSWORD`, `JWT_EXPIRE_MINUTES`) |
+| The FIRST superadmin's bootstrap credentials, or token lifetime | `backend/.env` (`ADMIN_EMAIL`, `ADMIN_PASSWORD` — first boot only, `JWT_EXPIRE_MINUTES`) |
+| Who can create/reset/delete admin accounts | `backend/app/security.py` (`require_superadmin`), `backend/app/services/users.py` |
+| Admin account storage (roles, password hashes) | `backend/app/services/users.py`, `backend/instance/admin.db` |
 | The chat UI itself | `frontend/src/pages/Chat.jsx` |
+| The Admins tab / change-password UI | `frontend/src/pages/AdminPanel.jsx` |
 | How voice input/output works | `frontend/src/lib/useVoice.js` |
 | The visual theme | `frontend/src/styles.css` |
 | Which Qdrant instance is used (local vs. cloud) | `backend/.env` (`QDRANT_URL`, `QDRANT_API_KEY`) |

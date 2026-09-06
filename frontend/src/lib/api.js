@@ -95,6 +95,37 @@ export const api = {
 
   stats: () => fetch(`${BASE}/admin/stats`, { headers: adminHeaders() }).then(handle),
 
+  me: () => fetch(`${BASE}/admin/me`, { headers: adminHeaders() }).then(handle),
+
+  listAdmins: () => fetch(`${BASE}/admin/users`, { headers: adminHeaders() }).then(handle),
+
+  createAdmin: (email, password, role) =>
+    fetch(`${BASE}/admin/users`, {
+      method: 'POST',
+      headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ email, password, role }),
+    }).then(handle),
+
+  deleteAdmin: (userId) =>
+    fetch(`${BASE}/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: adminHeaders(),
+    }).then(handle),
+
+  changeOwnPassword: (current_password, new_password) =>
+    fetch(`${BASE}/admin/me/password`, {
+      method: 'PATCH',
+      headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ current_password, new_password }),
+    }).then(handle),
+
+  resetAdminPassword: (userId, new_password) =>
+    fetch(`${BASE}/admin/users/${userId}/password`, {
+      method: 'PATCH',
+      headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ new_password }),
+    }).then(handle),
+
   browse: (limit = 250) =>
     fetch(`${BASE}/admin/browse?limit=${limit}`, { headers: adminHeaders() }).then(handle),
 

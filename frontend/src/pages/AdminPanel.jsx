@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api, auth } from '../lib/api.js'
 
-const TABS = [
+const BASE_TABS = [
   { id: 'text', label: '📄 Text' },
   { id: 'file', label: '⬆ File' },
   { id: 'url', label: '🌐 URL' },
@@ -14,12 +14,22 @@ export default function AdminPanel() {
   const [tab, setTab] = useState('text')
   const [stats, setStats] = useState(null)
   const [toast, setToast] = useState(null)
+  const [me, setMe] = useState(null)   // {id, email, role} — decides whether the Admins tab shows at all
 
   const [text, setText] = useState('')
   const [sourceName, setSourceName] = useState('manual-text')
   const [url, setUrl] = useState('')
   const [rows, setRows] = useState([])
   const [busy, setBusy] = useState(false)
+
+  const [admins, setAdmins] = useState([])
+  const [newEmail, setNewEmail] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [newRole, setNewRole] = useState('admin')
+  const [curPass, setCurPass] = useState('')
+  const [nextPass, setNextPass] = useState('')
+
+  const TABS = me?.role === 'superadmin' ? [...BASE_TABS, { id: 'admins', label: '👑 Admins' }] : BASE_TABS
 
   const refreshStats = useCallback(async () => {
     try {
@@ -37,6 +47,7 @@ export default function AdminPanel() {
   useEffect(() => {
     if (!auth.get()) { nav('/admin'); return }
     refreshStats()
+    api.me().then(setMe).catch(() => {})
   }, [nav, refreshStats])
 
   function flash(message, kind = 'ok') {
@@ -78,6 +89,68 @@ export default function AdminPanel() {
 
   useEffect(() => { if (tab === 'browse') loadBrowse() }, [tab]) // eslint-disable-line
 
+  async function loadAdmins() {
+    setBusy(true)
+    try {
+      setAdmins(await api.listAdmins())
+    } catch (err) {
+      flash(`✕ ${err.message}`, 'err')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  useEffect(() => { if (tab === 'admins') loadAdmins() }, [tab]) // eslint-disable-line
+
+  async function submitCreateAdmin() {
+    setBusy(true)
+    try {
+      await api.createAdmin(newEmail, newPassword, newRole)
+      flash(`✓ Created ${newEmail}`)
+      setNewEmail(''); setNewPassword(''); setNewRole('admin')
+      await loadAdmins()
+    } catch (err) {
+      flash(`✕ ${err.message}`, 'err')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function resetSomeonesPassword(userId, email) {
+    const pw = window.prompt(`New password for ${email} (min 8 chars):`)
+    if (!pw) return
+    try {
+      await api.resetAdminPassword(userId, pw)
+      flash(`✓ Password reset for ${email}`)
+    } catch (err) {
+      flash(`✕ ${err.message}`, 'err')
+    }
+  }
+
+  async function removeAdmin(userId, email) {
+    if (!window.confirm(`Remove admin account ${email}? This can't be undone.`)) return
+    try {
+      await api.deleteAdmin(userId)
+      flash(`✓ Removed ${email}`)
+      await loadAdmins()
+    } catch (err) {
+      flash(`✕ ${err.message}`, 'err')
+    }
+  }
+
+  async function submitChangeOwnPassword() {
+    setBusy(true)
+    try {
+      await api.changeOwnPassword(curPass, nextPass)
+      flash('✓ Password updated')
+      setCurPass(''); setNextPass('')
+    } catch (err) {
+      flash(`✕ ${err.message}`, 'err')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="admin-bg admin-bg--panel">
       <div className="panel">
@@ -114,6 +187,30 @@ export default function AdminPanel() {
           </div>
           <button className="chip" onClick={refreshStats}>⟳</button>
         </div>
+
+        {me && (
+          <details className="card">
+            <summary style={{ cursor: 'pointer' }}>
+              🔑 Change my password ({me.email} · {me.role})
+            </summary>
+            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <input
+                className="line" type="password" placeholder="Current password"
+                value={curPass} onChange={(e) => setCurPass(e.target.value)}
+              />
+              <input
+                className="line" type="password" placeholder="New password (min 8 chars)"
+                value={nextPass} onChange={(e) => setNextPass(e.target.value)}
+              />
+              <button
+                className="btn-primary" disabled={busy || !curPass || nextPass.length < 8}
+                onClick={submitChangeOwnPassword}
+              >
+                Update Password
+              </button>
+            </div>
+          </details>
+        )}
 
         <nav className="tabs">
           {TABS.map((t) => (
@@ -201,6 +298,64 @@ export default function AdminPanel() {
                 </table>
                 {!rows.length && !busy && <p className="muted center">No data yet.</p>}
               </div>
+            </>
+          )}
+
+          {tab === 'admins' && (
+            <>
+              <div className="card__head">
+                <div>
+                  <h3>👑 Admin Accounts</h3>
+                  <p className="muted small">Super-admin only — create, reset, or remove admin logins</p>
+                </div>
+                <button className="chip" onClick={loadAdmins}>⟳ Refresh</button>
+              </div>
+
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Email</th><th>Role</th><th>Created</th><th></th></tr>
+                  </thead>
+                  <tbody>
+                    {admins.map((u) => (
+                      <tr key={u.id}>
+                        <td>{u.email}</td>
+                        <td><span className={`pill pill--${u.role}`}>{u.role}</span></td>
+                        <td className="muted tiny">{new Date(u.created_at).toLocaleDateString()}</td>
+                        <td style={{ display: 'flex', gap: 6 }}>
+                          <button className="chip" onClick={() => resetSomeonesPassword(u.id, u.email)}>
+                            Reset password
+                          </button>
+                          <button className="chip" onClick={() => removeAdmin(u.id, u.email)}>
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <h3 style={{ marginTop: 18 }}>➕ Add Admin</h3>
+              <input
+                className="line" placeholder="new.admin@cbit.ac.in"
+                value={newEmail} onChange={(e) => setNewEmail(e.target.value)}
+              />
+              <input
+                className="line" type="password" placeholder="Temporary password (min 8 chars)"
+                value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+              />
+              <select className="line" value={newRole} onChange={(e) => setNewRole(e.target.value)}>
+                <option value="admin">admin</option>
+                <option value="superadmin">superadmin</option>
+              </select>
+              <button
+                className="btn-primary"
+                disabled={busy || !newEmail || newPassword.length < 8}
+                onClick={submitCreateAdmin}
+              >
+                Create Admin
+              </button>
             </>
           )}
         </section>
