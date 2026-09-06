@@ -7,6 +7,8 @@ venv/
 
 # --- Secrets: NEVER commit real keys ---
 backend/.env
+# backend/instance/ holds admin.db (bcrypt password hashes) — never commit
+backend/instance/
 
 # --- Regenerable data (scraper output — regenerate with `python -m scraper.crawl`) ---
 backend/data/text_content/*

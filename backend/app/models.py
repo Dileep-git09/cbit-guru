@@ -65,6 +65,42 @@ class TokenResponse(BaseModel):
     expires_in: int
 
 
+class MeResponse(BaseModel):
+    # What the frontend calls right after login to decide what to show —
+    # e.g. only a superadmin's panel gets the "Admins" tab.
+    id: str
+    email: str
+    role: str
+
+
+class CreateAdminUserRequest(BaseModel):
+    email: str
+    password: str = Field(min_length=8)
+    role: Literal["admin", "superadmin"] = "admin"
+
+
+class AdminUserOut(BaseModel):
+    id: str
+    email: str
+    role: str
+    created_at: str
+
+
+class ChangeOwnPasswordRequest(BaseModel):
+    # Self-service password change requires the CURRENT password as proof of
+    # identity — the JWT alone isn't enough (a stolen-but-still-valid token
+    # shouldn't be enough to permanently take over the account).
+    current_password: str
+    new_password: str = Field(min_length=8)
+
+
+class ResetPasswordRequest(BaseModel):
+    # A super admin resetting someone ELSE's password is an admin override —
+    # no current password needed, since the whole point is the target user
+    # may have forgotten it.
+    new_password: str = Field(min_length=8)
+
+
 class IngestTextRequest(BaseModel):
     text: str = Field(min_length=20)          # reject trivially short pastes
     source_name: str = "manual-text"

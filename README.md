@@ -111,7 +111,7 @@ cd backend
 python -m scripts.smoke_test
 ```
 Runs the whole pipeline against an in-memory Qdrant with stubbed embedding and
-LLM calls — 17 assertions covering ingestion, retrieval, image retrieval, auth
+LLM calls — 29 assertions covering ingestion, retrieval, image retrieval, multi-admin auth/roles
 and every endpoint. Use it whenever you change the pipeline.
 
 ## Measure quality for the results chapter

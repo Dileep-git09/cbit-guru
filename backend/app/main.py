@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.routers import admin, chat
-from app.services import vectorstore
+from app.services import users, vectorstore
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,6 +33,10 @@ async def lifespan(_: FastAPI):
         log.info("Qdrant ready at %s", settings.qdrant_url)
     except Exception as exc:  # noqa: BLE001
         log.error("Qdrant unavailable at %s — %s", settings.qdrant_url, exc)
+
+    # Creates the admin_users table (and seeds the first superadmin from
+    # .env) on a fresh install — a no-op on every boot after that.
+    await users.init()
     yield
 
 

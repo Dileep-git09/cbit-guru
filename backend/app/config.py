@@ -45,8 +45,12 @@ class Settings(BaseSettings):
     max_pdf_chars: int = 50_000            # cap so one huge PDF can't dominate the KB
 
     # --- Admin auth ---
+    # admin_email/admin_password only matter on the very first boot: they seed
+    # the one initial superadmin row in the user database (services/users.py).
+    # After that the database is authoritative — these two values are ignored.
     admin_email: str = "admin@cbit.ac.in"
     admin_password: str = "change_me_now"
+    admin_db_file: str = "instance/admin.db"   # ":memory:" for tests — see users.py
     jwt_secret: str = "dev-only-insecure-secret"
     jwt_expire_minutes: int = 720          # token lifetime = 12 hours
 
@@ -69,6 +73,11 @@ class Settings(BaseSettings):
     def data_dir(self) -> Path:
         # Allow either an absolute path or one relative to backend/.
         p = Path(self.scrape_output_dir)
+        return p if p.is_absolute() else BACKEND_ROOT / p
+
+    @property
+    def admin_db_path(self) -> Path:
+        p = Path(self.admin_db_file)
         return p if p.is_absolute() else BACKEND_ROOT / p
 
 
