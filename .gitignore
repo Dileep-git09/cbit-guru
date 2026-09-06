@@ -8,13 +8,11 @@ venv/
 # --- Secrets: NEVER commit real keys ---
 backend/.env
 
-# --- Regenerable data (scraper output) ---
+# --- Regenerable data (scraper output — regenerate with `python -m scraper.crawl`) ---
 backend/data/text_content/*
 backend/data/pdfs/*
-!backend/data/**/.gitkeep
-# keep the image manifest layout but not the downloaded binaries
 backend/data/images/*
-!backend/data/images/manifest.json
+!backend/data/**/.gitkeep
 
 # --- Node / frontend ---
 node_modules/
