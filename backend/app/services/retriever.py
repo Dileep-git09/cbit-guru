@@ -17,9 +17,16 @@ async def retrieve(
     question: str,
     user_id: str | None = None,
     top_k: int | None = None,
+    qvec: list[float] | None = None,
 ) -> dict[str, Any]:
-    """Embed the query once, then run two filtered searches: text and images."""
-    qvec = await embeddings.embed_query(question)
+    """Embed the query once, then run two filtered searches: text and images.
+
+    `qvec` lets a caller that already embedded the question — chat.py does,
+    to check the semantic response cache before deciding whether retrieval
+    is even needed — pass it straight through instead of paying for a
+    second, identical Gemini call.
+    """
+    qvec = qvec if qvec is not None else await embeddings.embed_query(question)
     limit = top_k or settings.top_k
 
     text_hits = await vectorstore.search(

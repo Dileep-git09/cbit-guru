@@ -27,7 +27,7 @@ from app.models import (
     TokenResponse,
 )
 from app.security import CurrentAdmin, create_token, require_admin, require_superadmin, verify_admin
-from app.services import ingest, users, vectorstore
+from app.services import cache, ingest, users, vectorstore
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -113,11 +113,14 @@ async def delete_admin_user(
 
 @router.get("/stats", response_model=StatsResponse)
 async def stats(_: CurrentAdmin = Depends(require_admin)) -> StatsResponse:
+    cache_stats = cache.stats()
     return StatsResponse(
         total_points=await vectorstore.count(),
         collection=settings.qdrant_collection,
         embedding_model=settings.embedding_model,
         llm_model=settings.cohere_model,
+        cache_exact_entries=cache_stats["exact_entries"],
+        cache_semantic_entries=cache_stats["semantic_entries"],
     )
 
 

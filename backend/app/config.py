@@ -57,6 +57,24 @@ class Settings(BaseSettings):
     # --- CORS: which browser origins may call this API ---
     allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
+    # --- Scaling for many concurrent students (see services/cache.py, ratelimit.py) ---
+    # Caps on simultaneous outbound calls to each paid/free-tier API, shared
+    # across EVERY concurrent request this process is handling. Without this,
+    # 50 students clicking "send" at the same instant fire 50 simultaneous
+    # Gemini/Cohere calls and instantly blow through the free-tier rate limit
+    # for everyone — this is the exact failure mode a real ingest run hit.
+    gemini_max_concurrency: int = 5
+    cohere_max_concurrency: int = 5
+
+    cache_enabled: bool = True
+    cache_ttl_seconds: int = 3600              # how long a cached answer stays valid
+    cache_max_semantic_entries: int = 200      # cap on the paraphrase-matching cache
+    cache_semantic_threshold: float = 0.97     # cosine similarity required to reuse an answer
+
+    # Per-IP requests/minute to /api/chat*. 0 disables the limiter entirely
+    # (e.g. for a controlled demo where you don't want to risk tripping it).
+    chat_rate_limit_per_minute: int = 30
+
     # --- Scraper ---
     scrape_root_url: str = "https://www.cbit.ac.in"
     scrape_max_pages: int = 150

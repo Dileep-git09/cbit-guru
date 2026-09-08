@@ -55,6 +55,7 @@ technical knowledge.
 """
 
 _client: cohere.AsyncClientV2 | None = None
+_global_sem: asyncio.Semaphore | None = None
 
 
 def _get_client() -> cohere.AsyncClientV2:
@@ -64,6 +65,16 @@ def _get_client() -> cohere.AsyncClientV2:
             raise RuntimeError("COHERE_API_KEY is not set — check backend/.env")
         _client = cohere.AsyncClientV2(api_key=settings.cohere_api_key)
     return _client
+
+
+def _get_global_sem() -> asyncio.Semaphore:
+    """Process-wide gate on in-flight Cohere calls — same reasoning as
+    embeddings._get_global_sem(): many students asking at once should queue
+    briefly, not all fire simultaneously and exhaust the shared quota."""
+    global _global_sem
+    if _global_sem is None:
+        _global_sem = asyncio.Semaphore(settings.cohere_max_concurrency)
+    return _global_sem
 
 
 def _is_rate_limit(exc: Exception) -> bool:
@@ -114,11 +125,12 @@ async def generate(
 
     for attempt in range(MAX_ATTEMPTS):
         try:
-            resp = await client.chat(
-                model=settings.cohere_model,
-                messages=messages,
-                temperature=0.2,   # low temperature: favour grounded, repeatable answers over creativity
-            )
+            async with _get_global_sem():
+                resp = await client.chat(
+                    model=settings.cohere_model,
+                    messages=messages,
+                    temperature=0.2,   # low temperature: favour grounded, repeatable answers over creativity
+                )
             return "".join(
                 item.text for item in resp.message.content if item.type == "text"
             ).strip()
@@ -141,9 +153,13 @@ async def generate_stream(
     """Token stream for the typing effect in the chat UI. Used by /api/chat/stream."""
     client = _get_client()
     messages = _build_messages(question, context, history)
-    stream = client.chat_stream(
-        model=settings.cohere_model, messages=messages, temperature=0.2
-    )
-    async for event in stream:
-        if event.type == "content-delta":
-            yield event.delta.message.content.text
+    # Held for the WHOLE stream, not just the opening call — a streaming
+    # response is one long-lived outbound connection, and it should count
+    # against the concurrency cap for its entire duration.
+    async with _get_global_sem():
+        stream = client.chat_stream(
+            model=settings.cohere_model, messages=messages, temperature=0.2
+        )
+        async for event in stream:
+            if event.type == "content-delta":
+                yield event.delta.message.content.text

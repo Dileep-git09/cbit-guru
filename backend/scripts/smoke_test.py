@@ -32,9 +32,12 @@ os.environ.setdefault("COHERE_API_KEY", "fake")
 os.environ.setdefault("ADMIN_EMAIL", "admin@cbit.ac.in")
 os.environ.setdefault("ADMIN_PASSWORD", "smoke-pass")
 os.environ.setdefault("JWT_SECRET", "smoke-secret")
+# Low on purpose: makes the rate-limit check below fast and deterministic
+# instead of needing dozens of requests to trip a real-world default.
+os.environ.setdefault("CHAT_RATE_LIMIT_PER_MINUTE", "3")
 
 from app.config import settings  # noqa: E402
-from app.services import embeddings, ingest, llm, retriever, vectorstore  # noqa: E402
+from app.services import cache, embeddings, ingest, llm, retriever, vectorstore  # noqa: E402
 
 PASS, FAIL = "\033[92mPASS\033[0m", "\033[91mFAIL\033[0m"
 results: list[tuple[str, bool, str]] = []
@@ -227,6 +230,44 @@ async def main() -> None:
         me = client.get("/api/admin/me", headers=hdr).json()
         r = client.delete(f"/api/admin/users/{me['id']}", headers=hdr)
         check("Deleting the last super admin is blocked", r.status_code == 400)
+
+        # --- response caching: a repeated identical question must not
+        # call the (fake, but call-counted) generator a second time ---
+        from app import ratelimit  # noqa: PLC0415
+
+        ratelimit.reset()
+        cache.clear()
+        calls = {"n": 0}
+        real_fake_generate = llm.generate
+
+        async def counting_generate(*a, **kw):
+            calls["n"] += 1
+            return await real_fake_generate(*a, **kw)
+
+        llm.generate = counting_generate
+        q = {"message": "What is the library timing at CBIT?"}
+        r1 = client.post("/api/chat", json=q)
+        r2 = client.post("/api/chat", json=q)
+        check(
+            "Cache: repeated question doesn't call the generator again",
+            r1.status_code == 200 and r2.status_code == 200 and calls["n"] == 1,
+            f"generate() called {calls['n']}x for 2 identical requests",
+        )
+        check("Cache: cached answer matches the original", r1.json()["answer"] == r2.json()["answer"])
+        llm.generate = real_fake_generate
+
+        # --- per-IP rate limiting on /api/chat* ---
+        ratelimit.reset()
+        statuses = [
+            client.post("/api/chat", json={"message": f"rate limit probe {i}"}).status_code
+            for i in range(5)
+        ]
+        check(
+            "Rate limiter blocks once the per-minute cap is hit",
+            429 in statuses,
+            f"statuses={statuses} (limit={settings.chat_rate_limit_per_minute}/min)",
+        )
+        ratelimit.reset()
 
     failed = [n for n, ok, _ in results if not ok]
     print("\n" + "=" * 62)

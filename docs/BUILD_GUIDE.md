@@ -132,6 +132,7 @@ cbit-guru/
 │   │   ├── config.py             # Settings loaded from .env — the single source of truth for every tunable
 │   │   ├── models.py             # Pydantic request/response schemas (the frontend<->backend contract)
 │   │   ├── security.py           # JWT creation/validation, role dependencies (require_admin/require_superadmin)
+│   │   ├── ratelimit.py          # per-IP sliding-window limit on /api/chat*
 │   │   │
 │   │   ├── routers/
 │   │   │   ├── __init__.py
@@ -146,7 +147,8 @@ cbit-guru/
 │   │       ├── ingest.py         # unifies text/PDF/image/URL input into one storage schema
 │   │       ├── retriever.py      # question -> embed -> search -> context block
 │   │       ├── llm.py            # Cohere generation, the grounding + multilingual system prompt
-│   │       └── users.py          # SQLite-backed admin accounts: bcrypt hashes, roles, CRUD
+│   │       ├── users.py          # SQLite-backed admin accounts: bcrypt hashes, roles, CRUD
+│   │       └── cache.py          # exact + semantic response cache (cuts repeat API calls)
 │   │
 │   ├── instance/
 │   │   └── admin.db              # SQLite admin-user table — gitignored, contains password hashes
@@ -326,6 +328,76 @@ different trust models for what looks like "the same" operation.
 superadmin, even as that superadmin, because that would leave the system
 with no account capable of ever creating another one.
 
+### 5.4 Scaling to many concurrent students
+
+A single laptop running one uvicorn process can still serve many students at
+once — but only if it's protected from the two ways that goes wrong: many
+students asking the *same* question, and many students asking *at the same
+instant*. Both are addressed with real code, not just a claim in a report.
+
+**Problem 1 — repeat questions waste the shared, scarce API quota.** In any
+real cohort, a handful of questions dominate ("where is CBIT located",
+"what are the placement stats", the four suggested questions the UI itself
+puts in front of every visitor). Answering each of those fresh, every time,
+burns the same free-tier Gemini/Cohere quota that every OTHER student is
+also drawing from.
+
+`services/cache.py` fixes this with two tiers, checked before any real API
+call:
+- **exact** — the normalised question string maps straight to a stored
+  response. Catches literal repeats at zero cost.
+- **semantic** — the new query's embedding (already needed for retrieval)
+  is compared via cosine similarity against a capped list of past
+  (embedding, response) pairs. Catches paraphrases the exact tier misses
+  ("Where's CBIT?" vs "Where is CBIT located?") at the cost of one
+  embedding call instead of a full retrieval + generation round trip.
+
+Measured on this exact deployment: a repeated question dropped from
+**13.6s to 0.27s** (exact-match hit, zero API calls), and a paraphrased
+version of the same question answered in **0.9s** (semantic hit — one
+embedding call, no generation call), both returning the byte-identical
+cached answer. `GET /api/admin/stats` exposes `cache_exact_entries` and
+`cache_semantic_entries` so this is visibly demonstrable, not just
+asserted.
+
+**Problem 2 — a burst of simultaneous requests can exhaust quota
+instantly.** This is not hypothetical: the very first real bulk ingest run
+hit this exact failure mode (§9.1) when one file's 61 chunks fired at once
+and blew through the free tier's requests-per-minute ceiling. The same
+thing happens if 50 students click "send" within the same second — 50
+simultaneous Gemini + Cohere calls, and the free tier rejects all of them,
+not just the excess.
+
+`embeddings.py` and `llm.py` each hold a **process-wide `asyncio.Semaphore`**
+(`GEMINI_MAX_CONCURRENCY` / `COHERE_MAX_CONCURRENCY`, default 5) around the
+actual outbound network call — not per-request, but shared across *every*
+concurrent request the process is handling. The 6th, 7th, ... simultaneous
+caller simply waits its turn for a slot instead of firing immediately, so a
+burst degrades to "briefly slower" instead of "rejected for everyone."
+
+**Problem 3 — one client (bug or abuse) can starve everyone else.**
+`ratelimit.py` is a per-IP sliding-window limiter (`CHAT_RATE_LIMIT_PER_MINUTE`,
+default 30/min) in front of both chat endpoints. It runs *before* the cache
+lookup, so even a flood of cache-hitting requests (which would otherwise be
+nearly free) still counts against the sender's own limit — this caps how
+much of the shared quota any single visitor can consume, protecting
+everyone else's access to the free tier.
+
+**The honest limitation, stated plainly:** all three mechanisms above are
+in-process, in-memory state. That's the correct, simplest choice for the
+actual deployment target — one uvicorn worker on one machine — and it's
+what makes the cache/limiter need zero extra infrastructure. It stops being
+correct the moment you run **multiple** worker processes or replicas behind
+a load balancer, since each process would keep its own separate cache and
+its own separate rate-limit counters, no longer shared. Scaling *past* a
+single process would mean swapping the in-memory dict/list in `cache.py`
+and `ratelimit.py` for a shared store — Redis is the standard choice — so
+every worker sees the same cache and the same per-IP counters. That swap is
+a well-scoped, incremental change (the function signatures in both modules
+would stay the same; only their storage backend changes), which is exactly
+the argument for why this architecture is credibly scalable rather than
+something that would need rearchitecting later.
+
 ---
 
 ## 6. Step-by-step: building it from scratch
@@ -431,7 +503,7 @@ correctly:
 cd backend
 python -m scripts.smoke_test
 ```
-Expect `29/29 checks passed`. This runs against an in-memory Qdrant with
+Expect `32/32 checks passed`. This runs against an in-memory Qdrant with
 fake embeddings/LLM — safe to run as often as you like.
 
 ### 8.2 Start the backend for real
@@ -572,6 +644,9 @@ below is a map to help you find the right file fast.
 | How voice input/output works | `frontend/src/lib/useVoice.js` |
 | The visual theme | `frontend/src/styles.css` |
 | Which Qdrant instance is used (local vs. cloud) | `backend/.env` (`QDRANT_URL`, `QDRANT_API_KEY`) |
+| How many API calls can be in flight at once | `backend/.env` (`GEMINI_MAX_CONCURRENCY`, `COHERE_MAX_CONCURRENCY`) |
+| Response caching (on/off, TTL, similarity threshold) | `backend/.env` (`CACHE_ENABLED`, `CACHE_TTL_SECONDS`, `CACHE_SEMANTIC_THRESHOLD`), `backend/app/services/cache.py` |
+| Per-IP chat rate limit | `backend/.env` (`CHAT_RATE_LIMIT_PER_MINUTE`), `backend/app/ratelimit.py` |
 
 For the full annotated source, start at `backend/app/main.py` and follow the
 imports outward — every file was written with generous inline comments

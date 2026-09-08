@@ -190,9 +190,14 @@ export default function AdminPanel() {
             <div className="muted small">Total Rows in Qdrant</div>
             <div className="statcard__num">{stats ? stats.total_points.toLocaleString() : '…'}</div>
             {stats && (
-              <div className="muted small">
-                {stats.collection} · {stats.embedding_model} · {stats.llm_model}
-              </div>
+              <>
+                <div className="muted small">
+                  {stats.collection} · {stats.embedding_model} · {stats.llm_model}
+                </div>
+                <div className="muted tiny">
+                  🗄 Cache: {stats.cache_exact_entries} exact · {stats.cache_semantic_entries} semantic
+                </div>
+              </>
             )}
           </div>
           <button className="chip" onClick={refreshStats}>⟳</button>
