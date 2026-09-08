@@ -540,6 +540,39 @@ python -m scripts.evaluate --file scripts/eval_set.json
 Prints retrieval hit-rate, answer accuracy, and mean latency — the numbers
 that belong in a results chapter.
 
+**Real measured results on this deployment** (30 questions in
+`eval_set.json`, every `must_contain` keyword pre-verified against the
+actual scraped data — see `git log` for the commit that built this set —
+`TOP_K=8`, real Gemini + Cohere, real CBIT data):
+
+| Metric | Result |
+|---|---|
+| Retrieval hit-rate | 28/30 (93.3%) |
+| Answer accuracy | 29/30 (96.7%) |
+| Mean latency | 11.57s |
+
+The one miss was a phrasing mismatch, not a defect: asked for the
+"eligibility criteria," the model correctly explained rank-based admission
+via TGEAPCET but never used the literal word "eligibility."
+
+**Ablation — why `TOP_K=8`, not a higher value:** raising `TOP_K` to 12 was
+tested and made things *worse* — answer accuracy dropped to 90.0% (27/30)
+for the *same* retrieval hit-rate and near-identical latency.
+
+| Config | Retrieval hit-rate | Answer accuracy | Mean latency |
+|---|---|---|---|
+| `TOP_K=8` (kept) | 93.3% | **96.7%** | 11.57s |
+| `TOP_K=12` | 93.3% | 90.0% | 11.74s |
+
+Two of the three `TOP_K=12` regressions weren't wrong facts — they were
+the model correctly answering an *English* question in *Hindi*. Pulling in
+more chunks occasionally drags in a non-English source snippet, and that
+snippet's language appears to influence the model's language-matching
+decision more than the question's own language does. This is a genuine,
+reportable finding: more context isn't free — it can measurably *reduce*
+answer quality by introducing noise, even when it doesn't change what gets
+retrieved.
+
 ---
 
 ## 9. Known gotchas and how we solved them
@@ -619,6 +652,73 @@ backend/data/images/*
 **Lesson:** in `.gitignore`, rule *order* matters as much as the patterns
 themselves — always put broad excludes before the specific exceptions that
 should survive them, and double-check with `git check-ignore -v <path>`.
+
+### 9.3 The response cache matched across languages
+
+**What happened:** found during Day 6 multilingual testing. Asking "Where
+is CBIT located?" in Hindi, then the identical question in Telugu, returned
+the *Hindi* answer for the Telugu question — the reply didn't even change
+script.
+
+**Root cause:** `services/cache.py`'s semantic tier (§5.4) matches on
+cosine similarity between question embeddings alone. Gemini's embedding
+model places the same *meaning* very close together in vector space
+regardless of language — "Where is CBIT?" in Hindi and in Telugu land well
+above the 0.97 similarity threshold — so the cache had no way to tell them
+apart and served whichever answer was cached first.
+
+**The fix:** bucket the semantic cache by the question's detected Unicode
+script (Telugu / Devanagari / Latin) — see `_script_bucket()` — so the
+cosine comparison only ever runs *within* a bucket. A Telugu question can
+now only match a previously-cached *Telugu* question, never a Hindi one.
+
+**Known, accepted limitation:** Hinglish and Tinglish are both written in
+Latin script, so this doesn't (and without real language detection,
+can't) separate those two from each other. Documented rather than hidden —
+see the module docstring in `cache.py`.
+
+**A debugging detour worth knowing about:** chasing this down initially
+looked like the fix hadn't worked — typing Devanagari/Telugu Unicode
+directly into a `curl -d` command via Bash on Windows silently corrupts
+the bytes before they reach the server (both scripts collapsed into the
+same corrupted bytes, so they still collided even after the real fix was
+in place). Confirmed the fix was correct all along using a plain Python
+`urllib` client that sends a proper UTF-8 JSON body. If you're ever
+testing non-ASCII input from a Windows terminal and results look wrong in
+a way the code doesn't explain, suspect the terminal before the code.
+
+### 9.4 A blank message crashed the server, and errors were unreadable
+
+**What happened:** found while working through the ROADMAP's Day 9
+hardening checklist. A message of only whitespace (`"   "`) passed
+`ChatRequest`'s `min_length=1` check (it counts raw characters, not
+meaningful content), reached `embeddings.embed_one()`, and hit a bare
+`raise ValueError("Cannot embed empty text")` — uncaught anywhere in the
+router, surfacing as an unhandled 500.
+
+**The fix:** a Pydantic `field_validator` on `ChatRequest.message` rejects
+a message that's blank *after stripping*, at the same request-validation
+boundary as the existing empty-string check — so it's a clean 422 like
+every other bad input, not a crash.
+
+**A second, related gap this surfaced:** FastAPI/Pydantic validation
+failures return `{"detail": [{"msg": ..., "loc": ...}, ...]}` — a list of
+objects, not a plain string. The frontend's shared `handle()` helper
+(`lib/api.js`) only handled the plain-string shape, so an `Error` built
+from the list rendered as `[object Object]`. Worse, `chatStream()` — the
+function the *actual chat page* uses — didn't call `handle()` at all, so
+any failure there showed a bare `"Stream failed (422)"` with no real
+reason. Both now share one `errorDetail()` helper that unpacks either
+shape. Verified live: pasting 5000 characters into the chat composer (the
+`<input>` has no `maxLength`, so this is genuinely reachable by a real
+user, not just a curl test) now shows "String should have at most 4000
+characters" instead of a dead end.
+
+**Lesson:** a length check on raw character count and a length check on
+*meaningful* content are different checks — `min_length=1` stops an empty
+string, not a whitespace one. And a generic catch-all error message at an
+API boundary is only as good as its weakest caller; here, one of the two
+call sites bypassed the shared error-handling helper entirely.
 
 ---
 
