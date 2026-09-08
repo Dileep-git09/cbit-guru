@@ -19,10 +19,20 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import sys
 import time
 from pathlib import Path
 
 from app.services import llm, retriever
+
+# Windows' default console codepage (cp1252) can't print ₹, Devanagari,
+# Telugu, or plenty else a real CBIT answer might contain — without this,
+# a single non-ASCII character in one answer crashes the whole eval run.
+# UTF-8 is a safe universal choice for terminal output on every platform
+# this project targets (Windows/macOS/Linux).
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
 
 
 async def run(path: Path) -> None:
