@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import Message from '../components/Message.jsx'
-import { api } from '../lib/api.js'
+import { api, auth } from '../lib/api.js'
 import { useSpeechRecognition, useSpeechSynthesis } from '../lib/useVoice.js'
 
 const SUGGESTIONS = [
@@ -107,7 +107,15 @@ export default function Chat() {
           <button className="chip" onClick={() => { setMessages([]); tts.cancel() }}>
             ↻ Clear
           </button>
-          <Link className="chip" to="/admin">⚙ Admin</Link>
+          {auth.get() ? (
+            <Link className="chip chip--on" to="/admin/panel" title="Go to your admin dashboard">
+              🛡 Dashboard
+            </Link>
+          ) : (
+            <Link className="chip" to="/admin" title="Admin login">
+              👤 Login
+            </Link>
+          )}
         </div>
       </header>
 

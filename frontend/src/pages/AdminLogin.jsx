@@ -12,7 +12,12 @@ export default function AdminLogin() {
 
   useEffect(() => {
     api.health().then((h) => setOnline(h.status === 'ok')).catch(() => setOnline(false))
-  }, [])
+    // Already holding a token from an earlier session? Skip straight past the
+    // form — AdminPanel itself re-validates the token (via /admin/me) and
+    // bounces back here if it's expired, so this can't strand anyone on a
+    // broken "logged in" state.
+    if (auth.get()) nav('/admin/panel')
+  }, [nav])
 
   async function submit(e) {
     e.preventDefault()

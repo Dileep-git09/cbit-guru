@@ -23,11 +23,14 @@ export default function AdminPanel() {
   const [busy, setBusy] = useState(false)
 
   const [admins, setAdmins] = useState([])
+  const [showAddAdmin, setShowAddAdmin] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newRole, setNewRole] = useState('admin')
   const [curPass, setCurPass] = useState('')
   const [nextPass, setNextPass] = useState('')
+
+  const ROLE_LABEL = { superadmin: '👑 Super Admin', admin: '🛡 Admin Member' }
 
   const TABS = me?.role === 'superadmin' ? [...BASE_TABS, { id: 'admins', label: '👑 Admins' }] : BASE_TABS
 
@@ -107,7 +110,7 @@ export default function AdminPanel() {
     try {
       await api.createAdmin(newEmail, newPassword, newRole)
       flash(`✓ Created ${newEmail}`)
-      setNewEmail(''); setNewPassword(''); setNewRole('admin')
+      setNewEmail(''); setNewPassword(''); setNewRole('admin'); setShowAddAdmin(false)
       await loadAdmins()
     } catch (err) {
       flash(`✕ ${err.message}`, 'err')
@@ -158,8 +161,15 @@ export default function AdminPanel() {
           <div className="brand">
             <div className="brand__logo brand__logo--pink">🛡</div>
             <div>
-              <div className="brand__name">CBIT Guru Admin</div>
-              <div className="muted small">Data Ingestion Panel</div>
+              <div className="brand__name">
+                CBIT Guru Admin
+                {me && (
+                  <span className={`pill pill--${me.role}`} style={{ marginLeft: 8 }}>
+                    {ROLE_LABEL[me.role] || me.role}
+                  </span>
+                )}
+              </div>
+              <div className="muted small">{me ? me.email : 'Data Ingestion Panel'}</div>
             </div>
           </div>
           <div className="topbar__actions">
@@ -190,9 +200,7 @@ export default function AdminPanel() {
 
         {me && (
           <details className="card">
-            <summary style={{ cursor: 'pointer' }}>
-              🔑 Change my password ({me.email} · {me.role})
-            </summary>
+            <summary style={{ cursor: 'pointer' }}>🔑 Change my password</summary>
             <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
               <input
                 className="line" type="password" placeholder="Current password"
@@ -308,7 +316,15 @@ export default function AdminPanel() {
                   <h3>👑 Admin Accounts</h3>
                   <p className="muted small">Super-admin only — create, reset, or remove admin logins</p>
                 </div>
-                <button className="chip" onClick={loadAdmins}>⟳ Refresh</button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="chip" onClick={loadAdmins}>⟳ Refresh</button>
+                  <button
+                    className={`chip ${showAddAdmin ? 'chip--on' : ''}`}
+                    onClick={() => setShowAddAdmin((v) => !v)}
+                  >
+                    + Add Admin
+                  </button>
+                </div>
               </div>
 
               <div className="table-wrap">
@@ -336,26 +352,30 @@ export default function AdminPanel() {
                 </table>
               </div>
 
-              <h3 style={{ marginTop: 18 }}>➕ Add Admin</h3>
-              <input
-                className="line" placeholder="new.admin@cbit.ac.in"
-                value={newEmail} onChange={(e) => setNewEmail(e.target.value)}
-              />
-              <input
-                className="line" type="password" placeholder="Temporary password (min 8 chars)"
-                value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-              />
-              <select className="line" value={newRole} onChange={(e) => setNewRole(e.target.value)}>
-                <option value="admin">admin</option>
-                <option value="superadmin">superadmin</option>
-              </select>
-              <button
-                className="btn-primary"
-                disabled={busy || !newEmail || newPassword.length < 8}
-                onClick={submitCreateAdmin}
-              >
-                Create Admin
-              </button>
+              {showAddAdmin && (
+                <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <h3 style={{ margin: 0 }}>➕ New Admin Account</h3>
+                  <input
+                    className="line" placeholder="new.admin@cbit.ac.in"
+                    value={newEmail} onChange={(e) => setNewEmail(e.target.value)}
+                  />
+                  <input
+                    className="line" type="password" placeholder="Temporary password (min 8 chars)"
+                    value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                  <select className="line" value={newRole} onChange={(e) => setNewRole(e.target.value)}>
+                    <option value="admin">admin</option>
+                    <option value="superadmin">superadmin</option>
+                  </select>
+                  <button
+                    className="btn-primary"
+                    disabled={busy || !newEmail || newPassword.length < 8}
+                    onClick={submitCreateAdmin}
+                  >
+                    Create Admin
+                  </button>
+                </div>
+              )}
             </>
           )}
         </section>
