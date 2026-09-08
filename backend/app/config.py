@@ -75,6 +75,28 @@ class Settings(BaseSettings):
     # (e.g. for a controlled demo where you don't want to risk tripping it).
     chat_rate_limit_per_minute: int = 30
 
+    # Optional shared backing store for the cache + rate limiter. Empty =
+    # in-memory only, correct for a single process. Set this (e.g.
+    # redis://localhost:6379/0) to share both across multiple worker
+    # processes/replicas — see services/cache.py and ratelimit.py. If Redis
+    # is configured but unreachable at connect time, both fall back to
+    # in-memory automatically rather than failing the whole app.
+    redis_url: str = ""
+
+    # A hung Gemini/Cohere call must not hold its concurrency-semaphore slot
+    # forever — with only 5 slots (gemini_max_concurrency), a handful of
+    # truly stuck requests would eventually stall the app for every student.
+    api_call_timeout_seconds: float = 20.0
+
+    # Circuit breaker: after this many CONSECUTIVE failures calling an API,
+    # stop retrying it for `circuit_breaker_cooldown_seconds` and fail fast
+    # instead — during a real outage, every request paying the full 5-retry
+    # backoff tax just adds latency for everyone without changing the
+    # outcome. One trial request is let through after the cooldown to check
+    # whether the dependency has recovered.
+    circuit_breaker_threshold: int = 5
+    circuit_breaker_cooldown_seconds: float = 30.0
+
     # --- Scraper ---
     scrape_root_url: str = "https://www.cbit.ac.in"
     scrape_max_pages: int = 150

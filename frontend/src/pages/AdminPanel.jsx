@@ -195,7 +195,7 @@ export default function AdminPanel() {
                   {stats.collection} · {stats.embedding_model} · {stats.llm_model}
                 </div>
                 <div className="muted tiny">
-                  🗄 Cache: {stats.cache_exact_entries} exact · {stats.cache_semantic_entries} semantic
+                  🗄 Cache ({stats.cache_backend}): {stats.cache_exact_entries} exact · {stats.cache_semantic_entries} semantic
                 </div>
               </>
             )}

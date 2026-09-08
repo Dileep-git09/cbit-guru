@@ -148,7 +148,9 @@ cbit-guru/
 │   │       ├── retriever.py      # question -> embed -> search -> context block
 │   │       ├── llm.py            # Cohere generation, the grounding + multilingual system prompt
 │   │       ├── users.py          # SQLite-backed admin accounts: bcrypt hashes, roles, CRUD
-│   │       └── cache.py          # exact + semantic response cache (cuts repeat API calls)
+│   │       ├── cache.py          # exact + semantic response cache (cuts repeat API calls)
+│   │       ├── circuitbreaker.py # fail-fast during a real Gemini/Cohere outage
+│   │       └── redisclient.py    # optional shared backend for cache.py + ratelimit.py
 │   │
 │   ├── instance/
 │   │   └── admin.db              # SQLite admin-user table — gitignored, contains password hashes
@@ -376,27 +378,73 @@ caller simply waits its turn for a slot instead of firing immediately, so a
 burst degrades to "briefly slower" instead of "rejected for everyone."
 
 **Problem 3 — one client (bug or abuse) can starve everyone else.**
-`ratelimit.py` is a per-IP sliding-window limiter (`CHAT_RATE_LIMIT_PER_MINUTE`,
+`ratelimit.py` is a per-IP rate limiter (`CHAT_RATE_LIMIT_PER_MINUTE`,
 default 30/min) in front of both chat endpoints. It runs *before* the cache
 lookup, so even a flood of cache-hitting requests (which would otherwise be
 nearly free) still counts against the sender's own limit — this caps how
 much of the shared quota any single visitor can consume, protecting
 everyone else's access to the free tier.
 
-**The honest limitation, stated plainly:** all three mechanisms above are
-in-process, in-memory state. That's the correct, simplest choice for the
-actual deployment target — one uvicorn worker on one machine — and it's
-what makes the cache/limiter need zero extra infrastructure. It stops being
-correct the moment you run **multiple** worker processes or replicas behind
-a load balancer, since each process would keep its own separate cache and
-its own separate rate-limit counters, no longer shared. Scaling *past* a
-single process would mean swapping the in-memory dict/list in `cache.py`
-and `ratelimit.py` for a shared store — Redis is the standard choice — so
-every worker sees the same cache and the same per-IP counters. That swap is
-a well-scoped, incremental change (the function signatures in both modules
-would stay the same; only their storage backend changes), which is exactly
-the argument for why this architecture is credibly scalable rather than
-something that would need rearchitecting later.
+**Problem 4 — a single hung request could starve the other four forever.**
+The concurrency semaphores from Problem 2 have a sharp edge: if one Gemini
+or Cohere call never returns (a network stall, not an error — just
+silence), it holds its semaphore slot forever. With only 5 slots, five
+unlucky hung requests would be enough to freeze the app for every student,
+indefinitely, with no exception ever raised to say why. `embeddings.py` and
+`llm.py`'s single-shot calls (`embed_one`, `generate`) wrap the actual
+network call in `asyncio.wait_for(..., timeout=API_CALL_TIMEOUT_SECONDS)`
+(default 20s) — the semaphore's `async with` block still releases the slot
+the instant the timeout fires, even though the underlying OS thread
+(`asyncio.to_thread`) can't be forcibly killed and keeps running in the
+background until the real call eventually returns or errors on its own.
+Streaming (`generate_stream`) deliberately has no fixed timeout — a stream
+is expected to run as long as the answer takes, so a single deadline would
+either cut off long legitimate answers or be too generous to catch a truly
+dead connection — it relies on Problem 5's circuit breaker instead.
+
+**Problem 5 — during a real outage, every request pays the full retry
+cost, without changing the outcome.** Both `embed_one` and `generate`
+retry up to 5 times with exponential backoff on a 429. That's the right
+behaviour for a *brief* rate-limit blip, but if Gemini or Cohere is
+actually down, every single request from every single student
+independently discovers that the slow way, taking several seconds each to
+fail, while also keeping the concurrency semaphore saturated with calls
+that were never going to succeed. `services/circuitbreaker.py` is a small
+three-state circuit breaker (closed → open → half-open): after
+`CIRCUIT_BREAKER_THRESHOLD` (default 5) *consecutive* failures, it "opens"
+and every call fails immediately — no retries, no waiting — for
+`CIRCUIT_BREAKER_COOLDOWN_SECONDS` (default 30s). After the cooldown,
+exactly one call is let through as a trial: if it succeeds the breaker
+closes again, if it fails the cooldown restarts. Gemini and Cohere each
+get their own independent breaker instance, since one being down says
+nothing about the other.
+
+**The scaling-past-one-process gap — closed, not just documented.** An
+earlier version of this project stated that the cache and rate limiter
+were in-memory-only, correct for a single uvicorn worker but requiring a
+"future" swap to a shared store to run multiple worker processes or
+replicas. That swap is now actually implemented: set `REDIS_URL` (e.g.
+`redis://localhost:6379/0`) and both `services/cache.py`'s exact-match
+tier and `ratelimit.py` switch to Redis automatically — `services/
+redisclient.py` is the shared lazy connection both use. Leave `REDIS_URL`
+blank (the default) and both fall back to the exact same in-memory
+behaviour as before; nothing changes for the single-process deployment
+this project actually runs. If Redis is *configured* but unreachable when
+first needed, the same fallback kicks in automatically with a logged
+warning — a caching/rate-limiting optimisation failing to connect
+shouldn't take the whole chatbot down with it. Verified live: pointed
+`REDIS_URL` at a deliberately unreachable address and confirmed the app
+logs the warning and keeps serving real chat requests normally.
+
+**What's still genuinely single-process-only, and why that's fine:** the
+*semantic* cache tier (the cosine-similarity paraphrase matcher) stays
+in-memory regardless of `REDIS_URL`. A real vector-similarity index
+belongs in a proper vector store — this project already has one, Qdrant,
+for the actual knowledge base — not reimplemented on top of Redis's plain
+key-value/sorted-set primitives for what's at most a few hundred cache
+entries. Multiple workers would each keep their own separate semantic
+cache; only the exact-match tier and the rate limiter are shared. This is
+a deliberate, documented scope boundary, not an oversight.
 
 ---
 
@@ -503,7 +551,7 @@ correctly:
 cd backend
 python -m scripts.smoke_test
 ```
-Expect `32/32 checks passed`. This runs against an in-memory Qdrant with
+Expect `38/38 checks passed`. This runs against an in-memory Qdrant with
 fake embeddings/LLM — safe to run as often as you like.
 
 ### 8.2 Start the backend for real
@@ -747,6 +795,9 @@ below is a map to help you find the right file fast.
 | How many API calls can be in flight at once | `backend/.env` (`GEMINI_MAX_CONCURRENCY`, `COHERE_MAX_CONCURRENCY`) |
 | Response caching (on/off, TTL, similarity threshold) | `backend/.env` (`CACHE_ENABLED`, `CACHE_TTL_SECONDS`, `CACHE_SEMANTIC_THRESHOLD`), `backend/app/services/cache.py` |
 | Per-IP chat rate limit | `backend/.env` (`CHAT_RATE_LIMIT_PER_MINUTE`), `backend/app/ratelimit.py` |
+| Sharing the cache/rate-limiter across multiple worker processes | `backend/.env` (`REDIS_URL`), `backend/app/services/redisclient.py` |
+| How long a hung API call can block before it's abandoned | `backend/.env` (`API_CALL_TIMEOUT_SECONDS`) |
+| When a dependency outage should trip the circuit breaker | `backend/.env` (`CIRCUIT_BREAKER_THRESHOLD`, `CIRCUIT_BREAKER_COOLDOWN_SECONDS`), `backend/app/services/circuitbreaker.py` |
 
 For the full annotated source, start at `backend/app/main.py` and follow the
 imports outward — every file was written with generous inline comments

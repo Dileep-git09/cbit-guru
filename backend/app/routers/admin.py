@@ -113,7 +113,7 @@ async def delete_admin_user(
 
 @router.get("/stats", response_model=StatsResponse)
 async def stats(_: CurrentAdmin = Depends(require_admin)) -> StatsResponse:
-    cache_stats = cache.stats()
+    cache_stats = await cache.stats()
     return StatsResponse(
         total_points=await vectorstore.count(),
         collection=settings.qdrant_collection,
@@ -121,6 +121,7 @@ async def stats(_: CurrentAdmin = Depends(require_admin)) -> StatsResponse:
         llm_model=settings.cohere_model,
         cache_exact_entries=cache_stats["exact_entries"],
         cache_semantic_entries=cache_stats["semantic_entries"],
+        cache_backend=cache_stats["exact_backend"],
     )
 
 

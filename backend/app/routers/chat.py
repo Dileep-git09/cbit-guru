@@ -45,7 +45,7 @@ async def chat(req: ChatRequest, _rl: None = Depends(rate_limit_chat)) -> ChatRe
     """Non-streaming variant — simpler to call from scripts/tests."""
     started = time.perf_counter()
     try:
-        cached = cache.get_exact(req.message)
+        cached = await cache.get_exact(req.message)
         if cached is None:
             qvec = await embeddings.embed_query(req.message)
             cached = cache.get_semantic(req.message, qvec)
@@ -65,7 +65,7 @@ async def chat(req: ChatRequest, _rl: None = Depends(rate_limit_chat)) -> ChatRe
             sources = [s.model_dump() for s in _sources(hits["text"])]
             images = retriever.format_images(hits["images"])
             grounded = bool(context)
-            cache.put(req.message, qvec, answer, sources, images, grounded)
+            await cache.put(req.message, qvec, answer, sources, images, grounded)
     except RuntimeError as exc:
         # embeddings.py / llm.py raise RuntimeError for missing keys or
         # exhausted retries — surfaced as 503 (service unavailable), not 500,
@@ -92,7 +92,7 @@ async def chat_stream(req: ChatRequest, _rl: None = Depends(rate_limit_chat)):
     the whole cached answer — instant, and a legitimate UX signal that a
     well-known fact was already on hand rather than freshly generated.
     """
-    cached = cache.get_exact(req.message)
+    cached = await cache.get_exact(req.message)
     qvec = None
     if cached is None:
         qvec = await embeddings.embed_query(req.message)
@@ -135,7 +135,7 @@ async def chat_stream(req: ChatRequest, _rl: None = Depends(rate_limit_chat)):
             # Only cache a complete, un-errored answer — a half-generated
             # response is exactly the sort of thing we don't want served
             # back out to the next ten students who ask the same question.
-            cache.put(req.message, qvec, accumulated, sources, images, grounded)
+            await cache.put(req.message, qvec, accumulated, sources, images, grounded)
         yield "event: done\ndata: {}\n\n"
 
     return StreamingResponse(

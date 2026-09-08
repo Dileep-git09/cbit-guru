@@ -18,6 +18,7 @@ from google import genai
 from google.genai import types
 
 from app.config import settings
+from app.services.circuitbreaker import CircuitBreaker
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +32,11 @@ TaskType = Literal["RETRIEVAL_DOCUMENT", "RETRIEVAL_QUERY"]
 
 _client: genai.Client | None = None
 _global_sem: asyncio.Semaphore | None = None
+_breaker = CircuitBreaker(
+    "gemini",
+    failure_threshold=settings.circuit_breaker_threshold,
+    cooldown_seconds=settings.circuit_breaker_cooldown_seconds,
+)
 
 
 def _get_client() -> genai.Client:
@@ -68,6 +74,16 @@ async def embed_one(text: str, task_type: TaskType = "RETRIEVAL_DOCUMENT") -> li
     if not text:
         raise ValueError("Cannot embed empty text")
 
+    if _breaker.is_open:
+        # Fail immediately instead of spending 5 retries (several seconds)
+        # discovering what we already know: Gemini has been failing
+        # repeatedly. Every caller gets this fast, honest answer during an
+        # outage instead of a slow one, and the concurrency semaphore stays
+        # free for the trial request that eventually reopens the breaker.
+        raise RuntimeError(
+            "Gemini is temporarily unavailable (circuit breaker open) — try again shortly"
+        )
+
     client = _get_client()
     last_exc: Exception | None = None
 
@@ -80,15 +96,23 @@ async def embed_one(text: str, task_type: TaskType = "RETRIEVAL_DOCUMENT") -> li
                 # The google-genai SDK is sync-only, so we push the network call
                 # onto a worker thread with asyncio.to_thread — this keeps FastAPI's
                 # event loop free to serve other requests while we wait on Gemini.
-                resp = await asyncio.to_thread(
-                    client.models.embed_content,
-                    model=settings.embedding_model,
-                    contents=text,
-                    config=types.EmbedContentConfig(
-                        task_type=task_type,
-                        output_dimensionality=settings.embedding_dim,
+                # wait_for bounds the whole thing: to_thread's underlying OS
+                # thread can't be cancelled mid-call, but wait_for still stops
+                # US waiting on it and frees the semaphore slot, so one truly
+                # hung request can't permanently starve the other 4.
+                resp = await asyncio.wait_for(
+                    asyncio.to_thread(
+                        client.models.embed_content,
+                        model=settings.embedding_model,
+                        contents=text,
+                        config=types.EmbedContentConfig(
+                            task_type=task_type,
+                            output_dimensionality=settings.embedding_dim,
+                        ),
                     ),
+                    timeout=settings.api_call_timeout_seconds,
                 )
+            _breaker.record_success()
             return list(resp.embeddings[0].values)
         except Exception as exc:  # noqa: BLE001 — we retry on anything transient
             last_exc = exc
@@ -103,6 +127,7 @@ async def embed_one(text: str, task_type: TaskType = "RETRIEVAL_DOCUMENT") -> li
             )
             await asyncio.sleep(delay)
 
+    _breaker.record_failure()
     raise RuntimeError(f"Embedding failed after {MAX_ATTEMPTS} attempts: {last_exc}")
 
 

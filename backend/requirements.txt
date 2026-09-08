@@ -27,3 +27,7 @@ Pillow==11.1.0
 tenacity==9.0.0
 python-dotenv==1.0.1
 httpx==0.28.1
+
+# --- Optional scaling backend (services/cache.py, ratelimit.py) ---
+# Only used if REDIS_URL is set in .env; falls back to in-memory otherwise.
+redis==5.2.1
