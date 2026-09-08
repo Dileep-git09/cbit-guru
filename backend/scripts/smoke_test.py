@@ -236,7 +236,7 @@ async def main() -> None:
         from app import ratelimit  # noqa: PLC0415
 
         ratelimit.reset()
-        cache.clear()
+        await cache.clear()
         calls = {"n": 0}
         real_fake_generate = llm.generate
 
@@ -264,9 +264,9 @@ async def main() -> None:
         # bucketed by script (see cache.py's module docstring). Uses the
         # SAME fake vector for both questions to simulate that worst case
         # directly, rather than hoping two real embeddings collide.
-        cache.clear()
+        await cache.clear()
         same_vec = [1.0] + [0.0] * (settings.embedding_dim - 1)
-        cache.put("देवनागरी में सवाल", same_vec, "Hindi-language answer", [], [], True)
+        await cache.put("देवनागरी में सवाल", same_vec, "Hindi-language answer", [], [], True)
         cross_hit = cache.get_semantic("తెలుగు లో ప్రశ్న", same_vec)
         check(
             "Cache: identical-meaning question in a different script is NOT reused",
@@ -278,7 +278,7 @@ async def main() -> None:
             "Cache: identical-meaning question in the SAME script still hits",
             same_script_hit is not None and same_script_hit.answer == "Hindi-language answer",
         )
-        cache.clear()
+        await cache.clear()
 
         # --- per-IP rate limiting on /api/chat* ---
         ratelimit.reset()
@@ -292,6 +292,26 @@ async def main() -> None:
             f"statuses={statuses} (limit={settings.chat_rate_limit_per_minute}/min)",
         )
         ratelimit.reset()
+
+    # --- circuit breaker: unit-level, since simulating a real Gemini/Cohere
+    # outage end-to-end would mean the test suite deliberately breaking
+    # network calls rather than testing our own code ---
+    from app.services.circuitbreaker import CircuitBreaker  # noqa: PLC0415
+
+    cb = CircuitBreaker("test", failure_threshold=3, cooldown_seconds=0.2)
+    check("Circuit breaker starts closed", not cb.is_open)
+    for _ in range(3):
+        cb.record_failure()
+    check("Circuit breaker opens after the failure threshold", cb.is_open)
+    await asyncio.sleep(0.25)
+    check("Circuit breaker half-opens after the cooldown elapses", not cb.is_open)
+    cb.record_success()
+    cb.record_failure()
+    check(
+        "A single failure right after recovery doesn't reopen it early",
+        not cb.is_open,
+        "record_success() resets the consecutive-failure count",
+    )
 
     failed = [n for n, ok, _ in results if not ok]
     print("\n" + "=" * 62)

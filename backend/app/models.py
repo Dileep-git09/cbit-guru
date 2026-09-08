@@ -137,6 +137,7 @@ class StatsResponse(BaseModel):
     llm_model: str
     cache_exact_entries: int = 0
     cache_semantic_entries: int = 0
+    cache_backend: str = "memory"   # "memory" or "redis" — confirms whether REDIS_URL is actually in effect
 
 
 class BrowseResponse(BaseModel):

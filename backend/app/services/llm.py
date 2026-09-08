@@ -19,6 +19,7 @@ import random
 import cohere
 
 from app.config import settings
+from app.services.circuitbreaker import CircuitBreaker
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +57,11 @@ technical knowledge.
 
 _client: cohere.AsyncClientV2 | None = None
 _global_sem: asyncio.Semaphore | None = None
+_breaker = CircuitBreaker(
+    "cohere",
+    failure_threshold=settings.circuit_breaker_threshold,
+    cooldown_seconds=settings.circuit_breaker_cooldown_seconds,
+)
 
 
 def _get_client() -> cohere.AsyncClientV2:
@@ -119,6 +125,11 @@ async def generate(
     history: list[dict[str, str]] | None = None,
 ) -> str:
     """Single-shot grounded answer, with 429 backoff. Used by /api/chat."""
+    if _breaker.is_open:
+        raise RuntimeError(
+            "Cohere is temporarily unavailable (circuit breaker open) — try again shortly"
+        )
+
     client = _get_client()
     messages = _build_messages(question, context, history)
     last_exc: Exception | None = None
@@ -126,11 +137,15 @@ async def generate(
     for attempt in range(MAX_ATTEMPTS):
         try:
             async with _get_global_sem():
-                resp = await client.chat(
-                    model=settings.cohere_model,
-                    messages=messages,
-                    temperature=0.2,   # low temperature: favour grounded, repeatable answers over creativity
+                resp = await asyncio.wait_for(
+                    client.chat(
+                        model=settings.cohere_model,
+                        messages=messages,
+                        temperature=0.2,   # low temperature: favour grounded, repeatable answers over creativity
+                    ),
+                    timeout=settings.api_call_timeout_seconds,
                 )
+            _breaker.record_success()
             return "".join(
                 item.text for item in resp.message.content if item.type == "text"
             ).strip()
@@ -142,6 +157,7 @@ async def generate(
             log.warning("Cohere rate-limited; sleeping %.2fs", delay)
             await asyncio.sleep(delay)
 
+    _breaker.record_failure()
     raise RuntimeError(f"Generation failed: {last_exc}")
 
 
@@ -150,16 +166,34 @@ async def generate_stream(
     context: str,
     history: list[dict[str, str]] | None = None,
 ):
-    """Token stream for the typing effect in the chat UI. Used by /api/chat/stream."""
+    """Token stream for the typing effect in the chat UI. Used by /api/chat/stream.
+
+    No hard timeout here, unlike generate() — a stream is expected to run
+    for as long as the answer takes to produce, so a single fixed deadline
+    would either cut off legitimately long answers or be too generous to
+    catch a truly hung connection. The circuit breaker still protects
+    against a dead Cohere entirely: a stream that raises before yielding
+    anything counts as a failure the same way a non-streaming call would.
+    """
+    if _breaker.is_open:
+        raise RuntimeError(
+            "Cohere is temporarily unavailable (circuit breaker open) — try again shortly"
+        )
+
     client = _get_client()
     messages = _build_messages(question, context, history)
     # Held for the WHOLE stream, not just the opening call — a streaming
     # response is one long-lived outbound connection, and it should count
     # against the concurrency cap for its entire duration.
     async with _get_global_sem():
-        stream = client.chat_stream(
-            model=settings.cohere_model, messages=messages, temperature=0.2
-        )
-        async for event in stream:
-            if event.type == "content-delta":
-                yield event.delta.message.content.text
+        try:
+            stream = client.chat_stream(
+                model=settings.cohere_model, messages=messages, temperature=0.2
+            )
+            async for event in stream:
+                if event.type == "content-delta":
+                    yield event.delta.message.content.text
+            _breaker.record_success()
+        except Exception:
+            _breaker.record_failure()
+            raise
