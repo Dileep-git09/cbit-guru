@@ -11,14 +11,29 @@ export const auth = {
   clear: () => localStorage.removeItem(TOKEN_KEY),
 }
 
+/** Pulls a human-readable message out of a failed response.
+ *
+ * Most of our own errors send {detail: "a plain string"} — but a
+ * FastAPI/Pydantic input-validation failure (bad field, blank message,
+ * message over 4000 chars, etc.) sends {detail: [{msg, loc, ...}, ...]}
+ * instead. Without unpacking that, an Error built straight from the array
+ * stringifies to "[object Object]" wherever it's displayed.
+ */
+async function errorDetail(res) {
+  let detail = `${res.status} ${res.statusText}`.trim()
+  try {
+    const body = await res.json()
+    if (Array.isArray(body.detail)) {
+      detail = body.detail.map((e) => e.msg || JSON.stringify(e)).join('; ')
+    } else if (body.detail) {
+      detail = body.detail
+    }
+  } catch { /* non-JSON error body */ }
+  return detail
+}
+
 async function handle(res) {
-  if (!res.ok) {
-    let detail = res.statusText
-    try {
-      detail = (await res.json()).detail || detail
-    } catch { /* non-JSON error body */ }
-    throw new Error(detail)
-  }
+  if (!res.ok) throw new Error(await errorDetail(res))
   return res.json()
 }
 
@@ -49,8 +64,12 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, history }),
     })
-    if (!res.ok || !res.body) {
-      onError?.(new Error(`Stream failed (${res.status})`))
+    if (!res.ok) {
+      onError?.(new Error(await errorDetail(res)))
+      return
+    }
+    if (!res.body) {
+      onError?.(new Error('Stream failed: empty response body'))
       return
     }
 
