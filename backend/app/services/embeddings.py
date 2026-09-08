@@ -30,6 +30,7 @@ BASE_DELAY = 0.3  # seconds — doubles each retry: 0.3, 0.6, 1.2, 2.4s
 TaskType = Literal["RETRIEVAL_DOCUMENT", "RETRIEVAL_QUERY"]
 
 _client: genai.Client | None = None
+_global_sem: asyncio.Semaphore | None = None
 
 
 def _get_client() -> genai.Client:
@@ -41,6 +42,19 @@ def _get_client() -> genai.Client:
             raise RuntimeError("GEMINI_API_KEY is not set — check backend/.env")
         _client = genai.Client(api_key=settings.gemini_api_key)
     return _client
+
+
+def _get_global_sem() -> asyncio.Semaphore:
+    """Process-wide gate on *actually in-flight* Gemini calls, regardless of
+    which code path they came from (a single chat question, or one file's
+    worth of ingest chunks). This is what stands between "many students ask
+    a question at the same instant" and "everyone gets a 429" — the extra
+    requests wait their turn here instead of all firing at once.
+    """
+    global _global_sem
+    if _global_sem is None:
+        _global_sem = asyncio.Semaphore(settings.gemini_max_concurrency)
+    return _global_sem
 
 
 def _is_rate_limit(exc: Exception) -> bool:
@@ -59,18 +73,22 @@ async def embed_one(text: str, task_type: TaskType = "RETRIEVAL_DOCUMENT") -> li
 
     for attempt in range(MAX_ATTEMPTS):
         try:
-            # The google-genai SDK is sync-only, so we push the network call
-            # onto a worker thread with asyncio.to_thread — this keeps FastAPI's
-            # event loop free to serve other requests while we wait on Gemini.
-            resp = await asyncio.to_thread(
-                client.models.embed_content,
-                model=settings.embedding_model,
-                contents=text,
-                config=types.EmbedContentConfig(
-                    task_type=task_type,
-                    output_dimensionality=settings.embedding_dim,
-                ),
-            )
+            # The global semaphore caps how many of these are truly in flight
+            # at once across the whole process; everyone else queues here
+            # rather than firing at Gemini simultaneously.
+            async with _get_global_sem():
+                # The google-genai SDK is sync-only, so we push the network call
+                # onto a worker thread with asyncio.to_thread — this keeps FastAPI's
+                # event loop free to serve other requests while we wait on Gemini.
+                resp = await asyncio.to_thread(
+                    client.models.embed_content,
+                    model=settings.embedding_model,
+                    contents=text,
+                    config=types.EmbedContentConfig(
+                        task_type=task_type,
+                        output_dimensionality=settings.embedding_dim,
+                    ),
+                )
             return list(resp.embeddings[0].values)
         except Exception as exc:  # noqa: BLE001 — we retry on anything transient
             last_exc = exc

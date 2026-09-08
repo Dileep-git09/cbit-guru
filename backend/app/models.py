@@ -122,6 +122,8 @@ class StatsResponse(BaseModel):
     collection: str
     embedding_model: str
     llm_model: str
+    cache_exact_entries: int = 0
+    cache_semantic_entries: int = 0
 
 
 class BrowseResponse(BaseModel):
