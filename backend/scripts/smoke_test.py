@@ -256,6 +256,30 @@ async def main() -> None:
         check("Cache: cached answer matches the original", r1.json()["answer"] == r2.json()["answer"])
         llm.generate = real_fake_generate
 
+        # --- cache regression: same-meaning question in a DIFFERENT
+        # script must never reuse another language's cached answer. This
+        # is a real bug found during multilingual testing — Gemini embeds
+        # "Where is CBIT?" in Hindi and Telugu close enough together that
+        # the semantic cache matched across languages before it was
+        # bucketed by script (see cache.py's module docstring). Uses the
+        # SAME fake vector for both questions to simulate that worst case
+        # directly, rather than hoping two real embeddings collide.
+        cache.clear()
+        same_vec = [1.0] + [0.0] * (settings.embedding_dim - 1)
+        cache.put("देवनागरी में सवाल", same_vec, "Hindi-language answer", [], [], True)
+        cross_hit = cache.get_semantic("తెలుగు లో ప్రశ్న", same_vec)
+        check(
+            "Cache: identical-meaning question in a different script is NOT reused",
+            cross_hit is None,
+            "correctly missed" if cross_hit is None else "BUG: cross-language cache hit",
+        )
+        same_script_hit = cache.get_semantic("देवनागरी में एक और सवाल", same_vec)
+        check(
+            "Cache: identical-meaning question in the SAME script still hits",
+            same_script_hit is not None and same_script_hit.answer == "Hindi-language answer",
+        )
+        cache.clear()
+
         # --- per-IP rate limiting on /api/chat* ---
         ratelimit.reset()
         statuses = [

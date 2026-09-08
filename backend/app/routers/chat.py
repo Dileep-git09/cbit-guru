@@ -48,7 +48,7 @@ async def chat(req: ChatRequest, _rl: None = Depends(rate_limit_chat)) -> ChatRe
         cached = cache.get_exact(req.message)
         if cached is None:
             qvec = await embeddings.embed_query(req.message)
-            cached = cache.get_semantic(qvec)
+            cached = cache.get_semantic(req.message, qvec)
         else:
             qvec = None  # exact hit — never needed the embedding at all
 
@@ -96,7 +96,7 @@ async def chat_stream(req: ChatRequest, _rl: None = Depends(rate_limit_chat)):
     qvec = None
     if cached is None:
         qvec = await embeddings.embed_query(req.message)
-        cached = cache.get_semantic(qvec)
+        cached = cache.get_semantic(req.message, qvec)
 
     if cached is not None:
         meta = {"sources": cached.sources, "images": cached.images, "grounded": cached.grounded}
