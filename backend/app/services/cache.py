@@ -20,6 +20,19 @@ worker processes or replicas would need a shared store (Redis) instead,
 since each process would otherwise keep its own separate cache — that's the
 scaling path documented in docs/BUILD_GUIDE.md rather than implemented
 here, since a single process is the real deployment target.
+
+The semantic tier is bucketed by SCRIPT (Latin / Devanagari / Telugu), not
+just meaning. This was found the hard way during multilingual testing:
+Gemini's embedding model places "Where is CBIT located?" and its Hindi and
+Telugu translations very close together in vector space (same meaning,
+different script) — well above the similarity threshold — so a Telugu
+question was getting served a cached HINDI answer purely because the
+underlying question was semantically the same one. Bucketing by script
+means the cosine comparison only ever runs against entries whose ORIGINAL
+question was written in the same script, so a same-meaning-different-
+script query can no longer return an answer in the wrong language. It does
+NOT catch every case (Hinglish and Tinglish are both Latin script but
+different languages) — a known, documented limitation, not a silent gap.
 """
 from __future__ import annotations
 
@@ -39,11 +52,27 @@ class CachedResponse:
 
 
 _exact: dict[str, CachedResponse] = {}
-_semantic: list[tuple[list[float], CachedResponse]] = []
+# Keyed by script bucket so a same-meaning question in a different script
+# never matches — see the module docstring for the incident that motivated this.
+_semantic: dict[str, list[tuple[list[float], CachedResponse]]] = {}
 
 
 def _normalize(question: str) -> str:
     return " ".join(question.strip().lower().split())
+
+
+def _script_bucket(question: str) -> str:
+    """Classify the dominant Unicode script of a question. Mirrors the
+    frontend's detectLang() in useVoice.js, which does the same thing for
+    the model's REPLY when picking a text-to-speech voice — this is the
+    same idea applied to the incoming QUESTION, to keep the cache from
+    matching across languages.
+    """
+    if any("ఀ" <= ch <= "౿" for ch in question):
+        return "telugu"
+    if any("ऀ" <= ch <= "ॿ" for ch in question):
+        return "devanagari"
+    return "latin"  # English, Hinglish, Tinglish — see the limitation noted above
 
 
 def _fresh(entry: CachedResponse) -> bool:
@@ -70,16 +99,18 @@ def get_exact(question: str) -> CachedResponse | None:
     return entry
 
 
-def get_semantic(qvec: list[float]) -> CachedResponse | None:
-    """Linear scan is fine here: the cache is capped at a few hundred
-    entries (cache_max_semantic_entries), so this is a few hundred dot
-    products per cache-miss lookup — trivial next to a network round trip
-    to Gemini/Cohere, and avoids pulling in a vector-index library for
-    something this small."""
+def get_semantic(question: str, qvec: list[float]) -> CachedResponse | None:
+    """Linear scan is fine here: each script bucket is capped at a few
+    hundred entries (cache_max_semantic_entries), so this is at most a few
+    hundred dot products per cache-miss lookup — trivial next to a network
+    round trip to Gemini/Cohere, and avoids pulling in a vector-index
+    library for something this small.
+    """
     if not settings.cache_enabled:
         return None
+    bucket = _semantic.get(_script_bucket(question), [])
     best: tuple[float, CachedResponse] | None = None
-    for vec, entry in _semantic:
+    for vec, entry in bucket:
         if not _fresh(entry):
             continue
         score = _cosine(qvec, vec)
@@ -101,13 +132,17 @@ def put(
     entry = CachedResponse(answer=answer, sources=sources, images=images, grounded=grounded)
     _exact[_normalize(question)] = entry
 
-    _semantic.append((qvec, entry))
-    if len(_semantic) > settings.cache_max_semantic_entries:
-        _semantic.pop(0)  # oldest-first eviction once over the cap
+    bucket = _semantic.setdefault(_script_bucket(question), [])
+    bucket.append((qvec, entry))
+    if len(bucket) > settings.cache_max_semantic_entries:
+        bucket.pop(0)  # oldest-first eviction once over the cap
 
 
 def stats() -> dict:
-    return {"exact_entries": len(_exact), "semantic_entries": len(_semantic)}
+    return {
+        "exact_entries": len(_exact),
+        "semantic_entries": sum(len(b) for b in _semantic.values()),
+    }
 
 
 def clear() -> None:
