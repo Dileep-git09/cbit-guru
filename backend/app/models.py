@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class Turn(BaseModel):
@@ -26,6 +26,19 @@ class ChatRequest(BaseModel):
     history: list[Turn] = Field(default_factory=list)   # prior turns for memory
     user_id: str | None = None                          # for per-user doc scoping
     stream: bool = False
+
+    @field_validator("message")
+    @classmethod
+    def _not_blank(cls, v: str) -> str:
+        # min_length=1 above only counts raw characters, so "   " (all
+        # whitespace) passes it — and then reaches embeddings.embed_one(),
+        # which raises a raw ValueError on empty-after-strip text. That
+        # ValueError isn't caught anywhere in the router, so it surfaced as
+        # an ugly unhandled 500 instead of a clean validation error. Reject
+        # it right here instead, at the same boundary as the empty-string case.
+        if not v.strip():
+            raise ValueError("message cannot be blank")
+        return v
 
 
 class SourceRef(BaseModel):
