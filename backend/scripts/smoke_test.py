@@ -164,6 +164,34 @@ async def main() -> None:
             r.status_code == 200 and "cbit_http_requests_total" in r.text,
         )
 
+        r = client.get("/api/health/live")
+        check("GET /api/health/live reports alive", r.status_code == 200 and r.json()["status"] == "alive")
+
+        r = client.get("/api/health/ready")
+        check(
+            "GET /api/health/ready is 200 with Qdrant+DB reachable",
+            r.status_code == 200 and r.json() == {"status": "ready", "checks": {"qdrant": True, "admin_db": True}},
+            r.json(),
+        )
+
+        # Simulate Qdrant being unreachable: readiness must flip to a real
+        # 503, not silently stay "ready" — this is the actual contract an
+        # orchestrator's readiness probe depends on.
+        from app.services import vectorstore as _vectorstore  # noqa: PLC0415
+
+        async def _fake_ping_down() -> bool:
+            return False
+
+        real_ping = _vectorstore.ping
+        _vectorstore.ping = _fake_ping_down
+        r = client.get("/api/health/ready")
+        check(
+            "GET /api/health/ready returns 503 when a dependency is down",
+            r.status_code == 503 and r.json()["checks"]["qdrant"] is False,
+            f"status={r.status_code} checks={r.json().get('checks')}",
+        )
+        _vectorstore.ping = real_ping
+
         r = client.post("/api/chat", json={"message": "Where is CBIT located?"})
         ok = r.status_code == 200 and r.json()["answer"]
         check("POST /api/chat", ok, f"{len(r.json().get('sources', []))} sources")
