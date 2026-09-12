@@ -1,5 +1,7 @@
 # CBIT Guru — AI-Powered Chat Assistant for CBIT
 
+[![CI](https://github.com/Dileep-git09/cbit-guru/actions/workflows/ci.yml/badge.svg)](https://github.com/Dileep-git09/cbit-guru/actions/workflows/ci.yml)
+
 A Retrieval-Augmented Generation (RAG) chat assistant that answers questions about
 Chaitanya Bharathi Institute of Technology from the institute's own website, PDFs
 and notices — with source citations, related campus images, voice input/output and
@@ -113,6 +115,15 @@ python -m scripts.smoke_test
 Runs the whole pipeline against an in-memory Qdrant with stubbed embedding and
 LLM calls — 43 assertions covering ingestion, retrieval, image retrieval, multi-admin auth/roles, caching, rate limiting, circuit breaker, observability & health probes
 and every endpoint. Use it whenever you change the pipeline.
+
+This same command (plus `ruff check .` for linting, and a frontend
+`npm run build`) runs automatically on every push and pull request —
+see `.github/workflows/ci.yml`. To run the lint locally:
+```bash
+cd backend
+pip install -r requirements-dev.txt
+ruff check .
+```
 
 ## Measure quality for the results chapter
 

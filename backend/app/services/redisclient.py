@@ -35,7 +35,7 @@ async def get_redis():
         return None
     if _client is None:
         try:
-            import redis.asyncio as aioredis
+            import redis.asyncio as aioredis  # noqa: PLC0415 — deliberately lazy: only paid for if REDIS_URL is actually set, and the except below tolerates a deployment that stripped the optional `redis` package
         except ImportError:
             log.warning(
                 "REDIS_URL is set but the 'redis' package isn't installed "
