@@ -25,6 +25,8 @@ from __future__ import annotations
 
 import time
 
+from app.services import metrics
+
 
 class CircuitBreaker:
     def __init__(self, name: str, failure_threshold: int, cooldown_seconds: float):
@@ -50,10 +52,14 @@ class CircuitBreaker:
         return True
 
     def record_success(self) -> None:
+        was_open = self._opened_at is not None
         self._consecutive_failures = 0
         self._opened_at = None
+        if was_open:
+            metrics.record_circuit_state(self.name, is_open=False)
 
     def record_failure(self) -> None:
         self._consecutive_failures += 1
-        if self._consecutive_failures >= self.failure_threshold:
+        if self._consecutive_failures >= self.failure_threshold and self._opened_at is None:
             self._opened_at = time.monotonic()
+            metrics.record_circuit_state(self.name, is_open=True)

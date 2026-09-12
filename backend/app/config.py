@@ -97,6 +97,15 @@ class Settings(BaseSettings):
     circuit_breaker_threshold: int = 5
     circuit_breaker_cooldown_seconds: float = 30.0
 
+    # --- Observability (app/logging_config.py, app/middleware.py) ---
+    # "plain" — human-readable one-liners, easiest to read in a terminal
+    # while developing. "json" — one JSON object per line (timestamp,
+    # level, logger, message, request_id, and anything else attached to the
+    # log record), the format a real deployment would ship to a log
+    # aggregator (Loki, CloudWatch, ELK, ...) that expects structured data
+    # rather than parsing free text with regexes.
+    log_format: str = "plain"
+
     # --- Scraper ---
     scrape_root_url: str = "https://www.cbit.ac.in"
     scrape_max_pages: int = 150

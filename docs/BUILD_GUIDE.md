@@ -133,6 +133,8 @@ cbit-guru/
 │   │   ├── models.py             # Pydantic request/response schemas (the frontend<->backend contract)
 │   │   ├── security.py           # JWT creation/validation, role dependencies (require_admin/require_superadmin)
 │   │   ├── ratelimit.py          # per-IP sliding-window limit on /api/chat*
+│   │   ├── logging_config.py     # structured (plain/JSON) logging + request-id propagation
+│   │   ├── middleware.py         # RequestContextMiddleware: request IDs, access logs, HTTP metrics
 │   │   │
 │   │   ├── routers/
 │   │   │   ├── __init__.py
@@ -150,7 +152,8 @@ cbit-guru/
 │   │       ├── users.py          # SQLite-backed admin accounts: bcrypt hashes, roles, CRUD
 │   │       ├── cache.py          # exact + semantic response cache (cuts repeat API calls)
 │   │       ├── circuitbreaker.py # fail-fast during a real Gemini/Cohere outage
-│   │       └── redisclient.py    # optional shared backend for cache.py + ratelimit.py
+│   │       ├── redisclient.py    # optional shared backend for cache.py + ratelimit.py
+│   │       └── metrics.py        # Prometheus counters/histograms, exposed at GET /metrics
 │   │
 │   ├── instance/
 │   │   └── admin.db              # SQLite admin-user table — gitignored, contains password hashes
@@ -446,6 +449,62 @@ entries. Multiple workers would each keep their own separate semantic
 cache; only the exact-match tier and the rate limiter are shared. This is
 a deliberate, documented scope boundary, not an oversight.
 
+### 5.5 Observability: structured logs, request tracing, metrics
+
+Everything above (caching, concurrency limits, circuit breakers) makes the
+system more resilient, but resilience you can't *see* is hard to trust or
+debug. This layer answers two different questions a real deployment needs
+answered: "what happened on THIS one request" (structured logs + request
+IDs) and "what's the trend over the last hour" (metrics) — deliberately
+two different tools, because they answer different questions and neither
+substitutes for the other.
+
+**Request tracing.** `app/middleware.py`'s `RequestContextMiddleware`
+assigns a short ID to every incoming HTTP request (or reuses one supplied
+via an `X-Request-ID` header, if this API sits behind a gateway that
+already assigns one) and stores it in a `contextvars.ContextVar`
+(`app/logging_config.py`). A logging `Filter` reads that contextvar back
+out for *every* log line emitted anywhere while handling that request —
+including lines logged deep inside `services/embeddings.py`, or even
+inside third-party libraries like `httpx`, none of which know request
+tracing exists. The practical effect: grep one request ID and see that
+request's whole story — which Qdrant queries it ran, which Cohere call it
+made, how long each took, and the final outcome — as one coherent
+narrative instead of hunting through interleaved output from every
+concurrent request. Verified directly: a single `/api/chat` call's ID
+appeared on its two Qdrant queries, its Cohere call, the chat summary
+line, and the access-log line — all four, tied together, none of them
+written by code that was told to do that explicitly.
+
+This middleware is deliberately a raw ASGI callable, not Starlette's
+`BaseHTTPMiddleware` — that wrapper buffers an entire response before
+forwarding it, which would silently turn `/api/chat/stream`'s token-by-
+token SSE typing effect into "the whole answer arrives at once." Wrapping
+`send` directly instead preserves streaming exactly as before.
+
+**Structured logs.** `LOG_FORMAT` in `.env` picks the output format:
+`plain` (the default) is a readable one-liner for a terminal during
+development; `json` emits one JSON object per log line — timestamp,
+level, logger name, message, request_id, and any extra fields a call site
+attached (`log.info(..., extra={"cache_tier": "exact", ...})` becomes real
+JSON keys, not text buried in a message string). That's the format a real
+deployment ships to a log aggregator (Loki, CloudWatch, ELK) that indexes
+fields for querying — "show me every request over 5 seconds in the last
+hour" becomes a query instead of a regex over free text.
+
+**Metrics.** `GET /metrics` exposes Prometheus's plain-text exposition
+format (`app/services/metrics.py`): total requests and request-duration
+histograms by method/path/status, response-cache hits by tier
+(`exact`/`semantic`/`miss` — a rising miss ratio over time is the signal
+that the cache has stopped earning its keep, long before anyone would
+notice reading logs), and a gauge per external dependency showing whether
+its circuit breaker is currently open. Deliberately unauthenticated,
+matching standard Prometheus practice — a real deployment restricts
+scrape access at the network layer, not behind the same JWT auth as the
+admin API. Path labels are normalised (`/api/admin/users/{id}/password`,
+not the literal id) so the number of distinct label combinations stays
+bounded instead of growing with every user ever created.
+
 ---
 
 ## 6. Step-by-step: building it from scratch
@@ -551,7 +610,7 @@ correctly:
 cd backend
 python -m scripts.smoke_test
 ```
-Expect `38/38 checks passed`. This runs against an in-memory Qdrant with
+Expect `40/40 checks passed`. This runs against an in-memory Qdrant with
 fake embeddings/LLM — safe to run as often as you like.
 
 ### 8.2 Start the backend for real
@@ -798,6 +857,9 @@ below is a map to help you find the right file fast.
 | Sharing the cache/rate-limiter across multiple worker processes | `backend/.env` (`REDIS_URL`), `backend/app/services/redisclient.py` |
 | How long a hung API call can block before it's abandoned | `backend/.env` (`API_CALL_TIMEOUT_SECONDS`) |
 | When a dependency outage should trip the circuit breaker | `backend/.env` (`CIRCUIT_BREAKER_THRESHOLD`, `CIRCUIT_BREAKER_COOLDOWN_SECONDS`), `backend/app/services/circuitbreaker.py` |
+| Plain vs. JSON structured logs | `backend/.env` (`LOG_FORMAT`), `backend/app/logging_config.py` |
+| How requests get their ID / what the access log records | `backend/app/middleware.py` |
+| What's tracked in `/metrics` | `backend/app/services/metrics.py` |
 
 For the full annotated source, start at `backend/app/main.py` and follow the
 imports outward — every file was written with generous inline comments

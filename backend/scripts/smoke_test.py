@@ -151,6 +151,19 @@ async def main() -> None:
         r = client.get("/api/health")
         check("GET /api/health", r.status_code == 200, r.json().get("status", ""))
 
+        r = client.get("/api/health")
+        check(
+            "Every response carries a distinct X-Request-ID header",
+            "x-request-id" in r.headers and len(r.headers["x-request-id"]) > 0,
+            r.headers.get("x-request-id", "missing"),
+        )
+
+        r = client.get("/metrics")
+        check(
+            "GET /metrics exposes Prometheus text format",
+            r.status_code == 200 and "cbit_http_requests_total" in r.text,
+        )
+
         r = client.post("/api/chat", json={"message": "Where is CBIT located?"})
         ok = r.status_code == 200 and r.json()["answer"]
         check("POST /api/chat", ok, f"{len(r.json().get('sources', []))} sources")
