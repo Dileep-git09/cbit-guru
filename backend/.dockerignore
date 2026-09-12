@@ -1,0 +1,13 @@
+# Never bake secrets or local state into the image — the container gets its
+# config from Render's environment variables, and its "disk" is scratch
+# space (see docs/DEPLOYMENT.md's ephemeral-storage note), not a copy of
+# whatever happens to be in the repo checkout at build time.
+.env
+.venv
+venv
+instance/
+data/
+.ruff_cache
+__pycache__
+*.pyc
+scripts/eval_results*.json

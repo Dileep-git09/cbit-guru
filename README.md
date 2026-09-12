@@ -136,6 +136,17 @@ Prints retrieval hit-rate, answer accuracy and mean latency. Edit
 
 ---
 
+## Deploying for real users
+
+Step-by-step guide to putting this in front of real students on free
+infrastructure (Render backend + Vercel frontend, alongside the Qdrant
+Cloud/Gemini/Cohere already used in dev): [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
+Keeping the knowledge base current after that without manual re-ingestion
+is planned (not yet built) in [docs/FUTURE_SCOPE_AUTO_REFRESH.md](docs/FUTURE_SCOPE_AUTO_REFRESH.md).
+
+---
+
 ## Project layout
 
 ```

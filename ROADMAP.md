@@ -413,3 +413,12 @@ conflicts on Day 11 are how projects die.
 - **Conversation memory across sessions** — persist history per `user_id`.
 - **ERP automation** — Chapter 5's future scope, using the Playwright dependency
   that's already installed.
+- **Auto-refresh knowledge base** — scheduled re-scrape + incremental
+  re-ingest so the site stays current without an admin manually
+  re-running things. Full design: [docs/FUTURE_SCOPE_AUTO_REFRESH.md](docs/FUTURE_SCOPE_AUTO_REFRESH.md).
+
+## Going live
+
+Deploying to real users on free infrastructure (Render + Vercel, alongside
+the Qdrant Cloud/Gemini/Cohere already in use) is documented step by step
+in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
