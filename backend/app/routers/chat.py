@@ -18,7 +18,7 @@ from fastapi.responses import StreamingResponse
 
 from app.models import ChatRequest, ChatResponse, RelatedImage, SourceRef
 from app.ratelimit import rate_limit_chat
-from app.services import cache, embeddings, llm, retriever
+from app.services import cache, embeddings, llm, metrics, retriever
 
 log = logging.getLogger(__name__)
 router = APIRouter(tags=["chat"])
@@ -45,12 +45,13 @@ async def chat(req: ChatRequest, _rl: None = Depends(rate_limit_chat)) -> ChatRe
     """Non-streaming variant — simpler to call from scripts/tests."""
     started = time.perf_counter()
     try:
-        cached = await cache.get_exact(req.message)
-        if cached is None:
-            qvec = await embeddings.embed_query(req.message)
-            cached = cache.get_semantic(req.message, qvec)
+        exact_hit = await cache.get_exact(req.message)
+        if exact_hit is not None:
+            cache_tier, cached, qvec = "exact", exact_hit, None
         else:
-            qvec = None  # exact hit — never needed the embedding at all
+            qvec = await embeddings.embed_query(req.message)
+            semantic_hit = cache.get_semantic(req.message, qvec)
+            cache_tier, cached = ("semantic", semantic_hit) if semantic_hit else ("miss", None)
 
         if cached is not None:
             answer, sources, images, grounded = (
@@ -73,12 +74,27 @@ async def chat(req: ChatRequest, _rl: None = Depends(rate_limit_chat)) -> ChatRe
         log.exception("chat failed")
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
+    latency_ms = int((time.perf_counter() - started) * 1000)
+    metrics.record_cache_hit(cache_tier)
+    # One structured line per chat request — with LOG_FORMAT=json this is
+    # directly queryable ("show me the p95 latency for cache misses"),
+    # not just readable.
+    log.info(
+        "chat request",
+        extra={
+            "cache_tier": cache_tier,
+            "grounded": grounded,
+            "sources_count": len(sources),
+            "latency_ms": latency_ms,
+        },
+    )
+
     return ChatResponse(
         answer=answer,
         sources=[SourceRef(**s) for s in sources],
         images=[RelatedImage(**i) for i in images],
         grounded=grounded,
-        latency_ms=int((time.perf_counter() - started) * 1000),
+        latency_ms=latency_ms,
     )
 
 
@@ -92,14 +108,27 @@ async def chat_stream(req: ChatRequest, _rl: None = Depends(rate_limit_chat)):
     the whole cached answer — instant, and a legitimate UX signal that a
     well-known fact was already on hand rather than freshly generated.
     """
-    cached = await cache.get_exact(req.message)
+    started = time.perf_counter()
+    exact_hit = await cache.get_exact(req.message)
     qvec = None
-    if cached is None:
+    if exact_hit is not None:
+        cache_tier, cached = "exact", exact_hit
+    else:
         qvec = await embeddings.embed_query(req.message)
-        cached = cache.get_semantic(req.message, qvec)
+        semantic_hit = cache.get_semantic(req.message, qvec)
+        cache_tier, cached = ("semantic", semantic_hit) if semantic_hit else ("miss", None)
 
     if cached is not None:
         meta = {"sources": cached.sources, "images": cached.images, "grounded": cached.grounded}
+        metrics.record_cache_hit(cache_tier)
+        log.info(
+            "chat stream request",
+            extra={
+                "cache_tier": cache_tier,
+                "grounded": cached.grounded,
+                "latency_ms": int((time.perf_counter() - started) * 1000),
+            },
+        )
 
         async def event_stream_cached():
             yield f"event: meta\ndata: {json.dumps(meta)}\n\n"
@@ -136,6 +165,16 @@ async def chat_stream(req: ChatRequest, _rl: None = Depends(rate_limit_chat)):
             # response is exactly the sort of thing we don't want served
             # back out to the next ten students who ask the same question.
             await cache.put(req.message, qvec, accumulated, sources, images, grounded)
+            metrics.record_cache_hit("miss")  # this request wasn't a hit — it's what FILLED the cache
+            log.info(
+                "chat stream request",
+                extra={
+                    "cache_tier": "miss",
+                    "grounded": grounded,
+                    "sources_count": len(sources),
+                    "latency_ms": int((time.perf_counter() - started) * 1000),
+                },
+            )
         yield "event: done\ndata: {}\n\n"
 
     return StreamingResponse(

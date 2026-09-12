@@ -66,7 +66,7 @@ python -c "import secrets; print(secrets.token_hex(32))"   # paste as JWT_SECRET
 uvicorn app.main:app --reload --port 8000
 
 # 3. Prove the wiring without burning quota
-python -m scripts.smoke_test                # expect 38/38 passed
+python -m scripts.smoke_test                # expect 40/40 passed
 
 # 4. Frontend (new terminal)
 cd frontend && npm install && npm run dev

@@ -8,17 +8,19 @@ from __future__ import annotations
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.logging_config import configure_logging
+from app.middleware import RequestContextMiddleware
 from app.routers import admin, chat
-from app.services import users, vectorstore
+from app.services import metrics, users, vectorstore
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
-)
+# Must run before anything else logs — sets up either plain human-readable
+# lines or one-JSON-object-per-line (LOG_FORMAT in .env), and attaches the
+# per-request request_id to every log record. See app/logging_config.py.
+configure_logging()
 log = logging.getLogger("cbit-guru")
 
 
@@ -59,8 +61,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Added LAST so it's the OUTERMOST layer (Starlette wraps middleware in
+# reverse registration order) — it needs to see and time the entire
+# request/response cycle, CORS handling included, not just what's left
+# after CORS has already run.
+app.add_middleware(RequestContextMiddleware)
+
 app.include_router(chat.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
+
+
+@app.get("/metrics", tags=["observability"])
+async def metrics_endpoint() -> Response:
+    """Prometheus scrape target — request counts/latency, cache hit ratio,
+    circuit breaker state. See app/services/metrics.py for what's tracked.
+
+    Deliberately unauthenticated, matching standard Prometheus practice —
+    a real deployment restricts this at the network layer (internal-only
+    ingress, IP allowlist) rather than behind the same JWT auth as the
+    admin API, since scrapers don't carry user credentials.
+    """
+    body, content_type = metrics.render()
+    return Response(content=body, media_type=content_type)
 
 
 @app.get("/api/health", tags=["health"])
