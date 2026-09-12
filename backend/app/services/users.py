@@ -214,3 +214,18 @@ async def count_superadmins() -> int:
     """Used to block deleting the last remaining super admin — otherwise a
     single mistaken delete could lock everyone out of admin management."""
     return await asyncio.to_thread(_count_superadmins_sync)
+
+
+def _ping_sync() -> bool:
+    try:
+        _get_conn().execute("SELECT 1").fetchone()
+        return True
+    except sqlite3.Error:
+        return False
+
+
+async def ping() -> bool:
+    """Cheap reachability check for the readiness probe (main.py's
+    /api/health/ready) — a trivial query, not a real lookup, just enough to
+    prove the SQLite file is actually openable and responsive."""
+    return await asyncio.to_thread(_ping_sync)

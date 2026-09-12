@@ -505,6 +505,46 @@ admin API. Path labels are normalised (`/api/admin/users/{id}/password`,
 not the literal id) so the number of distinct label combinations stays
 bounded instead of growing with every user ever created.
 
+### 5.6 Liveness vs. readiness — two different questions, two different failure modes
+
+`GET /api/health` (the frontend's "online" dot) conflates two genuinely
+different questions, which is fine for a UI indicator but not for an
+orchestrator deciding whether to restart a process or pull it out of a
+load balancer. Kubernetes and most cloud platforms expect these answered
+separately, with different consequences on failure:
+
+- **`GET /api/health/live`** — "is this process alive at all?" Checks
+  nothing external. If it can't respond, the process itself is wedged
+  (deadlocked event loop, genuinely crashed) and restarting it is the
+  right call. **Deliberately does not check Qdrant** — Qdrant being down
+  is not something a restart fixes, so checking it here would just add
+  restart churn on top of an outage that's already happening.
+- **`GET /api/health/ready`** — "can this instance serve traffic *right
+  now*?" Checks `vectorstore.ping()` (Qdrant) and `users.ping()` (the
+  admin SQLite file) — the two dependencies this process actually needs
+  directly. Returns a real HTTP 503 on failure, not a 200 with a
+  `"degraded"` body: orchestrators act on the **status code alone**, never
+  on response content, so the code has to carry the signal.
+
+**The deliberate omission:** readiness does **not** check Gemini/Cohere
+reachability or circuit-breaker state, even though those are real
+dependencies too. §5.4/§5.5's circuit breaker already turns a Gemini or
+Cohere outage into a fast, honest per-request 503 — folding that into
+readiness would pull the **entire instance** out of the load balancer over
+a problem that's already handled gracefully. Worse: if every replica hits
+the same third-party outage at the same moment (plausible — it's the same
+outage), an orchestrator would remove all of them from rotation, which
+means *no response at all* instead of the circuit breaker's fast, clear
+failure message. Readiness should reflect problems a restart or
+re-routing can actually help with; a downstream SaaS being briefly
+unavailable isn't one of them.
+
+Verified: `vectorstore.ping()` against a genuinely unreachable host (not a
+mock) correctly returns `False`, and the route's 200→503 status-code
+switch is covered by `scripts/smoke_test.py` — including a check that
+simulates Qdrant being down mid-run and confirms `/api/health/ready`
+actually flips to 503 rather than silently staying "ready."
+
 ---
 
 ## 6. Step-by-step: building it from scratch
@@ -610,7 +650,7 @@ correctly:
 cd backend
 python -m scripts.smoke_test
 ```
-Expect `40/40 checks passed`. This runs against an in-memory Qdrant with
+Expect `43/43 checks passed`. This runs against an in-memory Qdrant with
 fake embeddings/LLM — safe to run as often as you like.
 
 ### 8.2 Start the backend for real
@@ -860,6 +900,7 @@ below is a map to help you find the right file fast.
 | Plain vs. JSON structured logs | `backend/.env` (`LOG_FORMAT`), `backend/app/logging_config.py` |
 | How requests get their ID / what the access log records | `backend/app/middleware.py` |
 | What's tracked in `/metrics` | `backend/app/services/metrics.py` |
+| What counts as "ready" vs. just "alive" | `backend/app/main.py` (`/api/health/live`, `/api/health/ready`), `backend/app/services/vectorstore.py` (`ping()`), `backend/app/services/users.py` (`ping()`) |
 
 For the full annotated source, start at `backend/app/main.py` and follow the
 imports outward — every file was written with generous inline comments

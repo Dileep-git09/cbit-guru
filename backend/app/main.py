@@ -8,8 +8,9 @@ from __future__ import annotations
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.logging_config import configure_logging
@@ -93,3 +94,49 @@ async def health() -> dict:
         return {"status": "ok", "qdrant": "connected", "points": points}
     except Exception as exc:  # noqa: BLE001
         return {"status": "degraded", "qdrant": "unreachable", "detail": str(exc)}
+
+
+@app.get("/api/health/live", tags=["health"])
+async def liveness() -> dict:
+    """Liveness probe — "is this process alive at all?"
+
+    Deliberately checks NOTHING external. If this endpoint can't respond,
+    the process itself is wedged (deadlocked event loop, out of memory,
+    genuinely crashed) and an orchestrator restarting it is the right call.
+    If it responded, the process is fine — even if Qdrant, Gemini, or
+    Cohere are all down, which is a *readiness* concern (see below), not a
+    liveness one. Checking dependencies here would make a orchestrator
+    restart this process over a problem a restart can't fix (Qdrant being
+    down), which just adds churn without improving anything.
+    """
+    return {"status": "alive"}
+
+
+@app.get("/api/health/ready", tags=["health"])
+async def readiness() -> Response:
+    """Readiness probe — "can this instance actually serve traffic right
+    now?" Checks the dependencies THIS process needs directly: Qdrant (all
+    retrieval goes through it) and the admin SQLite file (all admin/auth
+    routes need it). Returns a real 503 on failure, not a 200 with a
+    "degraded" body — orchestrators (Kubernetes, load balancers) act on the
+    HTTP status code alone, not response content, so the status code IS
+    the signal.
+
+    Deliberately does NOT check Gemini/Cohere reachability or circuit
+    breaker state. Those already degrade gracefully per-request (a fast,
+    honest 503 from services/circuitbreaker.py on the one endpoint that
+    needs them) — folding a third-party SaaS blip into readiness would
+    pull this ENTIRE instance out of the load balancer over a problem
+    that's already handled, and if every replica hit the same outage
+    simultaneously, that's strictly worse than users seeing the circuit
+    breaker's fast-fail message: it's no response at all.
+    """
+    qdrant_ok = await vectorstore.ping()
+    db_ok = await users.ping()
+    checks = {"qdrant": qdrant_ok, "admin_db": db_ok}
+    ready = all(checks.values())
+    body = {"status": "ready" if ready else "not_ready", "checks": checks}
+    return JSONResponse(
+        content=body,
+        status_code=status.HTTP_200_OK if ready else status.HTTP_503_SERVICE_UNAVAILABLE,
+    )

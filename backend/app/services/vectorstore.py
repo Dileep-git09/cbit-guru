@@ -36,6 +36,20 @@ def get_client() -> AsyncQdrantClient:
     return _client
 
 
+async def ping() -> bool:
+    """Cheap reachability check for the readiness probe (main.py's
+    /api/health/ready) — lists collections rather than counting points, so
+    it stays fast regardless of how large the knowledge base grows. Never
+    raises: a connectivity problem is exactly the "not ready" signal the
+    caller wants, not an exception to handle.
+    """
+    try:
+        await get_client().get_collections()
+        return True
+    except Exception:  # noqa: BLE001
+        return False
+
+
 async def ensure_collection() -> None:
     """Create the collection on first boot if it does not already exist.
 
