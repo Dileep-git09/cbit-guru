@@ -139,7 +139,7 @@ cbit-guru/
 │   │
 │   ├── app/
 │   │   ├── __init__.py
-│   │   ├── main.py               # FastAPI app entry point: CORS, lifespan, /api/health
+│   │   ├── main.py               # FastAPI app entry point: CORS, lifespan, /api/health(/live|/ready), /metrics
 │   │   ├── config.py             # Settings loaded from .env — the single source of truth for every tunable
 │   │   ├── models.py             # Pydantic request/response schemas (the frontend<->backend contract)
 │   │   ├── security.py           # JWT creation/validation, role dependencies (require_admin/require_superadmin)
