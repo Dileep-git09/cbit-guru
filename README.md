@@ -130,25 +130,36 @@ Prints retrieval hit-rate, answer accuracy and mean latency. Edit
 ```
 cbit-guru/
 ├── backend/
+│   ├── requirements.txt       pinned dependencies
+│   ├── .env / .env.example    secrets (gitignored) / template (safe to commit)
+│   ├── instance/admin.db      SQLite admin accounts — gitignored, has password hashes
 │   ├── app/
-│   │   ├── main.py            FastAPI app + CORS + lifespan
+│   │   ├── main.py            FastAPI app, CORS, lifespan, /api/health(/live|/ready), /metrics
 │   │   ├── config.py          all settings, read from .env
 │   │   ├── models.py          request/response schemas
-│   │   ├── security.py        admin JWT
+│   │   ├── security.py        admin JWT, require_admin/require_superadmin
+│   │   ├── ratelimit.py       per-IP limiter on /api/chat* (in-memory or Redis-backed)
+│   │   ├── logging_config.py  structured plain/JSON logging + request-id propagation
+│   │   ├── middleware.py      RequestContextMiddleware: request IDs, access logs, HTTP metrics
 │   │   ├── routers/
 │   │   │   ├── chat.py        POST /api/chat  and  /api/chat/stream (SSE)
-│   │   │   └── admin.py       login, ingest text/file/URL, browse, stats
+│   │   │   └── admin.py       login, ingest text/file/URL, browse, stats, admin-user CRUD
 │   │   └── services/
-│   │       ├── embeddings.py  Gemini, 3072-d, 429 backoff (5 tries, 0.3s base)
-│   │       ├── vectorstore.py Qdrant collection, upsert, search, browse
-│   │       ├── chunker.py     HTML strip, clean, chunk with overlap
-│   │       ├── retriever.py   text + image retrieval, context fusion
-│   │       ├── llm.py         Cohere generate + stream, system prompt
-│   │       └── ingest.py      text / PDF / image / URL / folder walk
+│   │       ├── embeddings.py     Gemini, 3072-d, timeout + circuit breaker + 429 backoff
+│   │       ├── vectorstore.py    Qdrant collection, upsert, search, browse, ping()
+│   │       ├── chunker.py        HTML strip, clean, chunk with overlap
+│   │       ├── retriever.py      text + image retrieval, context fusion
+│   │       ├── llm.py            Cohere generate + stream, system prompt
+│   │       ├── ingest.py         text / PDF / image / URL / folder walk
+│   │       ├── users.py          SQLite admin accounts: bcrypt hashes, roles, ping()
+│   │       ├── cache.py          exact + semantic response cache (in-memory or Redis)
+│   │       ├── circuitbreaker.py fail-fast during a real Gemini/Cohere outage
+│   │       ├── redisclient.py    optional shared backend for cache.py + ratelimit.py
+│   │       └── metrics.py        Prometheus counters/histograms for GET /metrics
 │   ├── scraper/crawl.py       aiohttp + BeautifulSoup + Playwright crawler
 │   ├── scripts/
 │   │   ├── ingest_all.py      bulk-embed data/ into Qdrant
-│   │   ├── smoke_test.py      offline end-to-end verification
+│   │   ├── smoke_test.py      offline end-to-end verification (43 checks)
 │   │   ├── evaluate.py        accuracy + latency harness
 │   │   └── eval_set.json      test questions
 │   └── data/{text_content,pdfs,images}/
@@ -158,6 +169,7 @@ cbit-guru/
 │       ├── components/{Message,ImageStrip}.jsx
 │       ├── lib/{api.js,useVoice.js}
 │       └── styles.css
+├── docs/BUILD_GUIDE.md        architecture, pipelines, gotchas — the deep-dive reference
 ├── docker-compose.yml
 ├── ROADMAP.md                 ← 12-day build plan, read this next
 └── README.md
@@ -185,6 +197,29 @@ survives free-tier quota bursts.
 **Grounding.** The system prompt forbids answering outside the retrieved context
 and requires inline `[n]` citations. The frontend shows a collapsible Sources list
 with cosine scores so a viva examiner can see exactly what the answer came from.
+
+**Multi-admin, role-based auth.** SQLite-backed admin accounts (bcrypt hashes,
+never plaintext) with two roles — `admin` can ingest/browse data, only
+`superadmin` can create/reset/delete other admin accounts. See `services/users.py`.
+
+**Response caching for many concurrent students.** Repeat and near-repeat
+questions are answered from a two-tier cache (exact string match, then
+cosine-similarity paraphrase matching bucketed by script) instead of paying for
+a fresh Gemini + Cohere round trip every time. See `services/cache.py`.
+
+**Resilience under load or outage.** A process-wide concurrency cap on Gemini/
+Cohere calls stops a burst of simultaneous questions from instantly exhausting
+the shared free-tier quota; per-call timeouts stop one hung request from
+starving that cap forever; a circuit breaker fails fast during a real outage
+instead of every request paying a futile retry cost. See `services/embeddings.py`,
+`services/llm.py`, `services/circuitbreaker.py`, and `app/ratelimit.py`.
+
+**Observability.** Structured logs (plain or JSON) carry a request ID through
+every log line for one request — including third-party libraries — for tracing
+a single request end to end; `GET /metrics` exposes Prometheus-format counters;
+`GET /api/health/live` and `/api/health/ready` give an orchestrator two separate,
+correct signals instead of one conflated one. See `app/logging_config.py`,
+`app/middleware.py`, `services/metrics.py`, and `docs/BUILD_GUIDE.md` §5.5–5.6.
 
 ---
 

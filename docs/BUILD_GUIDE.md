@@ -80,16 +80,27 @@ placement news, events), retrieval is the only maintainable design.
 ```
 
 **One request, traced end to end** (this is the exact path a chat message
-takes — draw this on paper, it's the answer to "explain your architecture"):
+takes — draw this on paper, it's the answer to "explain your architecture".
+This is the FULL path, including the scaling/reliability layers from §5.4
+and §5.5 — an earlier version of this diagram only showed the retrieval
+core and skipped these, which meant a viva answer built from it would have
+been caught out by "doesn't it check a cache first?"):
 
 ```
 Frontend send()
-  → POST /api/chat/stream                (routers/chat.py)
-  → retriever.retrieve(question)         (services/retriever.py)
-      → embeddings.embed_query(question) (services/embeddings.py — Gemini)
-      → vectorstore.search(vector)       (services/vectorstore.py — Qdrant)
-  → retriever.build_context(hits)        (numbered, citable context block)
-  → llm.generate_stream(question, ctx)   (services/llm.py — Cohere, SSE)
+  → POST /api/chat/stream                     (routers/chat.py)
+  → rate_limit_chat dependency                (app/ratelimit.py — 429 if over the per-IP limit)
+  → cache.get_exact(question)                 (services/cache.py — normalised-string lookup)
+      ├─ HIT  → skip straight to streaming the cached answer back, done
+      └─ MISS → embeddings.embed_query(question)   (services/embeddings.py — Gemini)
+                → cache.get_semantic(question, vec)  (cosine similarity, same-script only)
+                    ├─ HIT  → stream the cached answer back, done
+                    └─ MISS → retriever.retrieve(question, qvec=vec)  (services/retriever.py)
+                                  → vectorstore.search(vec)  (services/vectorstore.py — Qdrant)
+                              → retriever.build_context(hits)   (numbered, citable context block)
+                              → llm.generate_stream(question, ctx)  (services/llm.py — Cohere, SSE)
+                              → cache.put(...)   (fills the cache for the next matching question)
+  → metrics.record_cache_hit(tier) + a structured "chat stream request" log line
   → tokens streamed back to the browser
 ```
 
@@ -164,7 +175,7 @@ cbit-guru/
 │   │
 │   ├── scripts/
 │   │   ├── __init__.py
-│   │   ├── smoke_test.py         # offline, zero-cost, 29-assertion pipeline check
+│   │   ├── smoke_test.py         # offline, zero-cost, 43-assertion pipeline check
 │   │   ├── ingest_all.py         # bulk-embed everything under data/ into Qdrant
 │   │   ├── evaluate.py           # retrieval hit-rate / answer accuracy / latency harness
 │   │   └── eval_set.json         # test questions with expected keywords
