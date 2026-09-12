@@ -113,7 +113,7 @@ class Crawler:
         if not self.use_playwright:
             return None
         try:
-            from playwright.async_api import async_playwright
+            from playwright.async_api import async_playwright  # noqa: PLC0415 — see docstring above
         except ImportError:
             return None
         try:
@@ -215,7 +215,9 @@ class Crawler:
         # page budget (max_pages) runs out on deep, less relevant pages.
         queue: deque[str] = deque([self.root])
         timeout = aiohttp.ClientTimeout(total=45)
-        connector = aiohttp.TCPConnector(limit=8, ssl=False)  # cap concurrent connections; ssl=False tolerates some colleges' misconfigured certs
+        # limit=8 caps concurrent connections; ssl=False tolerates some
+        # colleges' misconfigured certs.
+        connector = aiohttp.TCPConnector(limit=8, ssl=False)
 
         async with aiohttp.ClientSession(
             timeout=timeout, headers=HEADERS, connector=connector

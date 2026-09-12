@@ -14,6 +14,7 @@ Handles four input kinds, all converging on the same `_store()` helper:
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 import re
 from datetime import datetime, timezone
@@ -276,8 +277,6 @@ async def ingest_directory(root: Path | str | None = None) -> dict[str, int]:
     img_dir = root / "images"
     manifest = img_dir / "manifest.json"
     if manifest.is_file():
-        import json
-
         for item in json.loads(read_text_file(manifest)):
             res = await ingest_image(
                 file_name=item.get("file_name", ""),

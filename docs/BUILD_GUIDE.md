@@ -126,6 +126,9 @@ Frontend send()
 ```
 cbit-guru/
 ├── .gitignore                    # excludes .env, venvs, node_modules, regenerable scraped data
+├── .github/
+│   └── workflows/
+│       └── ci.yml                # lint + smoke test + frontend build, on every push/PR
 ├── docker-compose.yml            # local Qdrant option (alternative to Qdrant Cloud)
 ├── README.md                     # quick-start guide
 ├── ROADMAP.md                    # 12-day build/demo plan with viva Q&A
@@ -134,6 +137,8 @@ cbit-guru/
 │
 ├── backend/
 │   ├── requirements.txt          # pinned Python dependencies
+│   ├── requirements-dev.txt      # + ruff, for local linting and CI
+│   ├── pyproject.toml            # ruff config (rule selection, line length)
 │   ├── .env.example              # config template (safe to commit)
 │   ├── .env                      # REAL secrets (gitignored, never committed)
 │   │
@@ -556,6 +561,41 @@ switch is covered by `scripts/smoke_test.py` — including a check that
 simulates Qdrant being down mid-run and confirms `/api/health/ready`
 actually flips to 503 rather than silently staying "ready."
 
+### 5.7 Continuous integration
+
+Every other safeguard in §5.1–§5.6 only protects the running system —
+none of it stops a broken change from being merged in the first place if
+verifying it depends on someone remembering to run the smoke test by
+hand. `.github/workflows/ci.yml` runs on every push to `main` and every
+pull request, with two jobs:
+
+- **Backend** — installs `backend/requirements-dev.txt`, runs `ruff check
+  .` (lint), then `python -m scripts.smoke_test`. Needs **zero secrets**:
+  the smoke test fakes the Gemini/Cohere calls and runs against an
+  in-memory Qdrant, so there's nothing to leak even in public CI logs.
+- **Frontend** — `npm ci` + `npm run build`, catching anything that would
+  break the production bundle (a bad import, a JSX syntax error) before
+  it reaches `main`.
+
+**The lint config closes a real, pre-existing gap, not a new one.** The
+codebase already carried Ruff-style `# noqa: BLE001` / `# noqa: E402` /
+`# noqa: PLC0415` comments — anticipating a linter — from early in this
+project, but Ruff itself had never actually been installed or run against
+this code until this pass. Running it for the first time (`backend/
+pyproject.toml` selects the exact rule families those comments
+anticipated: `E`/`F`/`W`, `BLE` for the deliberate broad excepts, `PLC`/
+`PLE` for import placement) surfaced a few genuine, previously-
+unenforced issues: a `json` import inside a function with no real reason
+to be lazy (moved to the top of `ingest.py`), and two *legitimately* lazy
+imports (`redis.asyncio` in `redisclient.py`, `playwright.async_api` in
+`scraper/crawl.py` — both optional, heavy dependencies deliberately not
+imported unless actually needed) that had never been given the `noqa`
+comment their existing lazy-import pattern implied. `line-length = 120`
+(not Ruff's default 88) is a deliberate fit to this codebase's own style —
+the whole project favours long, explanatory inline comments over brevity,
+and enforcing 88 columns would have meant reflowing hundreds of lines of
+prose for no functional benefit.
+
 ---
 
 ## 6. Step-by-step: building it from scratch
@@ -912,6 +952,8 @@ below is a map to help you find the right file fast.
 | How requests get their ID / what the access log records | `backend/app/middleware.py` |
 | What's tracked in `/metrics` | `backend/app/services/metrics.py` |
 | What counts as "ready" vs. just "alive" | `backend/app/main.py` (`/api/health/live`, `/api/health/ready`), `backend/app/services/vectorstore.py` (`ping()`), `backend/app/services/users.py` (`ping()`) |
+| What runs in CI, and on which triggers | `.github/workflows/ci.yml` |
+| Lint rules / line length | `backend/pyproject.toml` |
 
 For the full annotated source, start at `backend/app/main.py` and follow the
 imports outward — every file was written with generous inline comments

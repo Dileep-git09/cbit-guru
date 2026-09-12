@@ -1,0 +1,5 @@
+# Dev/CI-only tooling — never needed to run the app itself, only to
+# develop or verify it. Kept separate from requirements.txt so a
+# production install doesn't pull in things it'll never use.
+-r requirements.txt
+ruff==0.16.7

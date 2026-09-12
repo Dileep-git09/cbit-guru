@@ -1,0 +1,18 @@
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+# The codebase already carried Ruff-style `# noqa: BLE001/E402/PLC0415`
+# comments before Ruff was ever actually wired up to run — this select
+# list is exactly the rule families those comments anticipated:
+#   E, F, W  — pycodestyle errors/warnings + pyflakes (the standard base)
+#   BLE      — flake8-blind-except: bans bare `except Exception` unless
+#              explicitly acknowledged, which this project does a lot
+#              (deliberately — see each noqa's inline reason) since a
+#              partial failure (one bad PDF, one image with no caption)
+#              shouldn't crash a whole ingest/scrape run.
+#   PLC, PLE — Pylint convention/error subset; PLC0415 (import not at
+#              top-of-file) is what flags the few genuinely-deliberate
+#              lazy imports (optional `redis`/`playwright` dependencies).
+select = ["E", "F", "W", "BLE", "PLC", "PLE"]
