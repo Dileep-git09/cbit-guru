@@ -249,3 +249,8 @@ correct signals instead of one conflated one. See `app/logging_config.py`,
 
 Built as a B.E. major project at CBIT, Hyderabad. Respect `robots.txt` and the
 institute's terms when crawling; the scraper identifies itself and stays on-domain.
+
+Licensed under the [MIT License](LICENSE) — use, fork, and modify freely, with
+attribution. Note this covers the code only: CBIT's own website content isn't
+redistributed here (`backend/data/` is gitignored; you generate it yourself by
+running the scraper against a source you're authorized to crawl).
