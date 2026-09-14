@@ -148,6 +148,12 @@ export const api = {
   browse: (limit = 250) =>
     fetch(`${BASE}/admin/browse?limit=${limit}`, { headers: adminHeaders() }).then(handle),
 
+  deleteDoc: (docId) =>
+    fetch(`${BASE}/admin/doc/${docId}`, {
+      method: 'DELETE',
+      headers: adminHeaders(),
+    }).then(handle),
+
   ingestText: (text, source_name) =>
     fetch(`${BASE}/admin/ingest/text`, {
       method: 'POST',

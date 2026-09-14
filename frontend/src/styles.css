@@ -71,6 +71,8 @@ a { color: inherit; }
 }
 .chip:hover { color: var(--text); border-color: #2f4165; }
 .chip--on { color: var(--accent); border-color: #1f6b45; background: #0f2a1d; }
+.chip--danger { color: var(--danger); }
+.chip--danger:hover { border-color: var(--danger); }
 
 /* ── Scroll area / hero ──────────────────────────────────────────────────── */
 .scroll { flex: 1; overflow-y: auto; padding: 24px 16px 8px; }
