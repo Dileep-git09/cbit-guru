@@ -28,3 +28,4 @@ Thumbs.db
 .vscode/*
 !.vscode/launch.json
 !.vscode/tasks.json
+.claude/

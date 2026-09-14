@@ -2,10 +2,9 @@
 
 This is the checklist for taking CBIT Guru from "runs on my laptop" to "real
 students can open a URL and use it." Every account signup and every payment
-detail below is something **you** do by hand in the provider's own UI —
-Claude does not create accounts, enter credentials, or click "deploy" on
-your behalf. This doc gets the repo itself ready and tells you exactly what
-to click.
+detail below is something **you** do by hand in the provider's own UI — no
+step here creates accounts, enters credentials, or clicks "deploy" for you.
+This doc gets the repo itself ready and tells you exactly what to click.
 
 ## Architecture once deployed
 
