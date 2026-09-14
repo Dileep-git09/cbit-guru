@@ -199,6 +199,7 @@ async def browse(limit: int = 250, offset: str | None = None) -> dict[str, Any]:
         "items": [
             {
                 "id": str(p.id),
+                "doc_id": (p.payload or {}).get("doc_id", ""),
                 "source": (p.payload or {}).get("type", "unknown"),
                 "file_name": (p.payload or {}).get("file_name", ""),
                 "url": (p.payload or {}).get("url", ""),

@@ -130,6 +130,18 @@ export default function AdminPanel() {
     }
   }
 
+  async function removeDoc(docId, label) {
+    if (!window.confirm(`Delete all chunks from "${label}"? This can't be undone.`)) return
+    try {
+      await api.deleteDoc(docId)
+      flash(`✓ Deleted ${label}`)
+      await loadBrowse()
+      await refreshStats()
+    } catch (err) {
+      flash(`✕ ${err.message}`, 'err')
+    }
+  }
+
   async function removeAdmin(userId, email) {
     if (!window.confirm(`Remove admin account ${email}? This can't be undone.`)) return
     try {
@@ -294,7 +306,7 @@ export default function AdminPanel() {
               <div className="table-wrap">
                 <table>
                   <thead>
-                    <tr><th>Source</th><th>Content Preview</th><th>ID</th></tr>
+                    <tr><th>Source</th><th>Content Preview</th><th>ID</th><th /></tr>
                   </thead>
                   <tbody>
                     {rows.map((r) => (
@@ -305,6 +317,16 @@ export default function AdminPanel() {
                         </td>
                         <td className="preview">{r.preview}…</td>
                         <td className="muted tiny">{r.id.slice(0, 8)}</td>
+                        <td>
+                          {r.doc_id && (
+                            <button
+                              className="chip chip--danger"
+                              onClick={() => removeDoc(r.doc_id, r.file_name || r.url || r.source)}
+                            >
+                              🗑 Delete
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
