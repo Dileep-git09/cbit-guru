@@ -128,7 +128,8 @@ cbit-guru/
 ├── .gitignore                    # excludes .env, venvs, node_modules, regenerable scraped data
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                # lint + smoke test + frontend build, on every push/PR
+│       ├── ci.yml                # lint + smoke test + frontend build, on every push/PR
+│       └── refresh_kb.yml        # weekly: re-scrape + incremental re-ingest (§5.8)
 ├── docker-compose.yml            # local Qdrant option (alternative to Qdrant Cloud)
 ├── README.md                     # quick-start guide
 ├── ROADMAP.md                    # 12-day build/demo plan with viva Q&A
@@ -183,12 +184,15 @@ cbit-guru/
 │   │   ├── smoke_test.py         # offline, zero-cost, 43-assertion pipeline check
 │   │   ├── ingest_all.py         # bulk-embed everything under data/ into Qdrant
 │   │   ├── evaluate.py           # retrieval hit-rate / answer accuracy / latency harness
+│   │   ├── refresh_knowledge_base.py  # scrape-diff-reingest — only what changed (§5.8)
+│   │   ├── bootstrap_crawl_state.py   # one-time: seed crawl_state.json from an existing collection
 │   │   └── eval_set.json         # test questions with expected keywords
 │   │
-│   └── data/                     # scraper output — entirely regenerable, gitignored
-│       ├── text_content/         # one .txt per scraped page
-│       ├── pdfs/                 # downloaded PDFs
-│       └── images/               # downloaded images + manifest.json (captions/context)
+│   └── data/
+│       ├── crawl_state.json      # refresh pipeline's own state — committed, NOT regenerable (§5.8)
+│       ├── text_content/         # one .txt per scraped page — regenerable, gitignored
+│       ├── pdfs/                 # downloaded PDFs — regenerable, gitignored
+│       └── images/               # downloaded images + manifest.json — regenerable, gitignored
 │
 └── frontend/
     ├── package.json
@@ -596,6 +600,68 @@ the whole project favours long, explanatory inline comments over brevity,
 and enforcing 88 columns would have meant reflowing hundreds of lines of
 prose for no functional benefit.
 
+### 5.8 Auto-refreshing the knowledge base
+
+§5.1's ingestion pipeline answers "how does a page get in" — it says
+nothing about what happens when cbit.ac.in changes after that. Until this
+section, the answer was "an admin re-runs the scraper and clicks reindex."
+`.github/workflows/refresh_kb.yml` now does this on a weekly schedule (and
+on manual dispatch) via `backend/scripts/refresh_knowledge_base.py`,
+touching Qdrant only for sources that are actually new, changed, or
+removed since last time.
+
+This mattered because re-running ingestion blindly is unsafe on this
+codebase specifically: `vectorstore.upsert_chunks()` assigns every chunk a
+random UUID, so a naive re-run duplicates every unchanged chunk instead of
+updating it, and scraped-page `doc_id`s are partly content-derived, so
+there's no way to know *which* old doc_id to delete without having
+recorded it. The fix is a small committed state file,
+`backend/data/crawl_state.json` — per source: `{doc_id, content_sha256,
+kind}`, keyed by filename (not URL — see below) — diffed against a fresh
+scrape every run.
+
+**Adopting this against an already-populated collection needed a
+bootstrap step**, or the very first run would have duplicated all 755
+existing points. `backend/scripts/bootstrap_crawl_state.py` scrolls every
+point already in Qdrant, recovers each document's real `doc_id` from its
+payload, and matches it back to the local file that produced it — seeding
+`crawl_state.json` with the *existing* doc_id so the pipeline's first real
+run correctly sees "unchanged," not "new." Run exactly once, before
+`refresh_knowledge_base.py`'s first real run, against a collection
+populated by `ingest_directory()`/`ingest_all.py` the old way.
+
+**Keyed by filename, not URL — a real mismatch the bootstrap step caught.**
+The original plan keyed the state file by each page's URL. That matched
+*zero* of the 149 existing text documents in production: `ingest_
+directory()` never actually passed `url=` to `ingest_text()` for scraped
+pages, so every one of their stored payloads has `url: ""`. Filenames,
+though, are exactly what every payload already carries
+(`payload.file_name`), and `crawl.py`'s `safe_name(url)` makes a filename
+a stable, deterministic function of the URL anyway — so the state file
+keys on filename (`"text:<file>"`, `"pdf:<file>"`, `"image:<image_url>"`),
+and `ingest_directory()` was separately fixed to pass a real `url=`
+(extracted from the page's own `URL: ` header) going forward, purely so
+citations can link to the real page.
+
+**A real, pre-existing gap this surfaced: scanned PDFs.** Bootstrapping
+found only 19 distinct pdf `doc_id`s in Qdrant against 82 locally scraped
+PDF files — not a collision, but 63 of the 82 being scanned, image-only
+PDFs with zero extractable text (`PyMuPDF` returns `""`, `chunk_text`
+returns no chunks, `_store()`'s `if not chunks: return 0` guard means
+nothing was ever written, silently, since the very first ingest). The
+refresh script now deliberately never records state for a zero-chunk
+result — recording it would make a source that was never actually stored
+look "done" forever. Instead it honestly reports these 63 as `new` on
+every single run, which is a correct, visible signal that closing this gap
+needs OCR, not a diff-logic fix.
+
+**Safety floor:** `MIN_SURVIVING_FRACTION = 0.5` aborts the delete/removal
+step entirely if a crawl comes back with fewer than half as many sources
+as last time — a transient site outage serving error pages doesn't get
+misread as "every page was removed." Full design rationale (why GitHub
+Actions, why a state file instead of querying Qdrant, what's deliberately
+out of scope) is in `docs/FUTURE_SCOPE_AUTO_REFRESH.md`.
+
 ---
 
 ## 6. Step-by-step: building it from scratch
@@ -954,6 +1020,10 @@ below is a map to help you find the right file fast.
 | What counts as "ready" vs. just "alive" | `backend/app/main.py` (`/api/health/live`, `/api/health/ready`), `backend/app/services/vectorstore.py` (`ping()`), `backend/app/services/users.py` (`ping()`) |
 | What runs in CI, and on which triggers | `.github/workflows/ci.yml` |
 | Lint rules / line length | `backend/pyproject.toml` |
+| Auto-refresh schedule / trigger | `.github/workflows/refresh_kb.yml` |
+| Scrape-diff-reingest logic, and the safety floor | `backend/scripts/refresh_knowledge_base.py` |
+| Seeding the state file against an already-populated collection | `backend/scripts/bootstrap_crawl_state.py` |
+| What the refresh pipeline has already ingested | `backend/data/crawl_state.json` |
 
 For the full annotated source, start at `backend/app/main.py` and follow the
 imports outward — every file was written with generous inline comments

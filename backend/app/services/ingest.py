@@ -143,7 +143,15 @@ async def ingest_pdf(
 
     body = clean_text("\n".join(pages))[: settings.max_pdf_chars]
     chunks = chunk_text(body)
-    doc_id = _doc_id("pdf", path.name, str(len(body)))
+    # body[:200] (not len(body)) — two different PDFs of near-identical
+    # length would otherwise collide onto the same doc_id, silently merging
+    # unrelated documents. (Not what caused the 19-vs-82 gap that surfaced
+    # while building scripts/refresh_knowledge_base.py — that turned out to
+    # be 63 of the 82 scraped PDFs being scanned/image-only with zero
+    # extractable text, so _store() never wrote them at all, collision or
+    # not. Still a real latent risk worth closing for the ones that do have
+    # text.)
+    doc_id = _doc_id("pdf", path.name, body[:200])
     written = await _store(
         chunks,
         doc_id=doc_id,
@@ -254,8 +262,13 @@ async def ingest_directory(root: Path | str | None = None) -> dict[str, int]:
             if f.suffix.lower() not in {".txt", ".md", ".html", ".htm"} or not f.is_file():
                 continue
             raw = read_text_file(f)
+            # crawl.py's save_page() always writes "URL: <url>" as the first
+            # line — recovering it here means the Sources UI can link back
+            # to the real page instead of showing an empty url.
+            first_line = raw.split("\n", 1)[0]
+            page_url = first_line[len("URL: ") :].strip() if first_line.startswith("URL: ") else ""
             res = await ingest_text(
-                raw, source_name=f.name, doc_type="html_text", system_scraper=True
+                raw, source_name=f.name, url=page_url, doc_type="html_text", system_scraper=True
             )
             stats["text"] += 1
             stats["chunks"] += res["chunks"]

@@ -1,0 +1,1077 @@
+{
+  "image:https://alumni.cbit.ac.in/application/static/images/spacer.png": {
+    "content_sha256": "1d6ddc1e0bc0a6a14e10c30575c2f05426fef5621f137efb7682da2e44a31da8",
+    "doc_id": "cbc68ab66d6f571a",
+    "kind": "image"
+  },
+  "image:https://i.gifer.com/origin/44/446eed82d7f9109817bade96938c576d_w200.gif": {
+    "content_sha256": "d4715af26260619ff38d7a6246bba640093249e0394bbfadc906e60565ec64ec",
+    "doc_id": "f0c057c2601f5a28",
+    "kind": "image"
+  },
+  "image:https://vaave.s3.amazonaws.com/assets/images/apple-store-btn.png": {
+    "content_sha256": "3c4bdcad80bf4ead5e4388a8b0b9499c8014d3968938042ab7f2e2c41c116dc3",
+    "doc_id": "ad41900a8fcdb665",
+    "kind": "image"
+  },
+  "image:https://vaave.s3.amazonaws.com/assets/images/google-store-btn.png": {
+    "content_sha256": "19832272f11f41165cc56708961441139388478d15e224315913159c43aaa3f2",
+    "doc_id": "e376ead132ae80b5",
+    "kind": "image"
+  },
+  "image:https://vaave.s3.amazonaws.com/block_images/_1f72bd0a49c646e125c56fd1aa42e049__.png": {
+    "content_sha256": "1623e08648001385883caa0a2acb3268506fb5b25758ac8fabae7b490a6acda5",
+    "doc_id": "0aa42cb6d95b591a",
+    "kind": "image"
+  },
+  "image:https://vaave.s3.amazonaws.com/block_images/_3645a6035f17da26c18f208d6af3f4ec__.jpg": {
+    "content_sha256": "d7f4813ce8f1fdded89db9c5a61e34e8ce869deba01c10676da35031ce5b4357",
+    "doc_id": "c56004722a60358b",
+    "kind": "image"
+  },
+  "image:https://vaave.s3.amazonaws.com/block_images/_ba4ac072daa9b5ec11071827bc1cc035__.jpg": {
+    "content_sha256": "848aa7977fa7f72034ad081f619b1149e83882d43549543627c5a29ca359a734",
+    "doc_id": "08a8da123e473437",
+    "kind": "image"
+  },
+  "image:https://vaave.s3.amazonaws.com/user_files/851f5ac9941d720844d143ed9cfcf60a_1e4941487b6d2a02aba49d93e7f5c842.png": {
+    "content_sha256": "20f41ab1e05e221e29e29c7e45395e488f773ab906686833cd23a705ec61e775",
+    "doc_id": "49514d090141c9b5",
+    "kind": "image"
+  },
+  "image:https://vaave.s3.amazonaws.com/user_files/851f5ac9941d720844d143ed9cfcf60a_379faa77feded66f0d2f1d58227494a0.png": {
+    "content_sha256": "2d4459c54a36fb21c495f9955c7c790f331cf71981ceb91d4f9c2c524a08d455",
+    "doc_id": "5010e3df00d4bd4b",
+    "kind": "image"
+  },
+  "image:https://vaave.s3.amazonaws.com/user_files/851f5ac9941d720844d143ed9cfcf60a_6015f3f920623932a2870da63914c77f.png": {
+    "content_sha256": "ccf6693473700422eb26474240ce3f35d1f6149ef886c85e6479a412102674cc",
+    "doc_id": "3ce6f2c48aae3ee3",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/themes/CBIT/images/academic-image1.jpg": {
+    "content_sha256": "daec0e77757beeb3a3d63f2e627ab9d0573c5147803b6f9e37ac079105c705ec",
+    "doc_id": "af4ace12dcceb710",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/themes/CBIT/images/placeholder.jpg": {
+    "content_sha256": "a909381c60437a9811650873501a6926a38a11d4ef90647323deb82a5b3304b6",
+    "doc_id": "aa9a1a2d55ffc6d3",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2019/04/Policy-Document-scaled.jpg": {
+    "content_sha256": "4bc8c9dca7e69eb63b9a22f7945bb47e642442fa77996ad99f4f37afcaa9d36d",
+    "doc_id": "214e620509f7758e",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2021/07/12-1-768x512.jpg": {
+    "content_sha256": "b9532750637375d9034c1e99763a79ca04637fdba799e4b5511dd14d6b585f30",
+    "doc_id": "466bb6a5c2f97974",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2021/07/13-768x512.jpg": {
+    "content_sha256": "867bd62cce49f05a5dc5c1cab6e38e1ff5cf1df53df010018aff41adb56337b7",
+    "doc_id": "0d87b5cf5066008a",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2021/07/14-768x512.jpg": {
+    "content_sha256": "cc407df14bb12af7b9fd801a404e4abef82385a0004e28d596c28e5dd399ea15",
+    "doc_id": "d78512b165e6d2b3",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2021/07/16-768x512.jpg": {
+    "content_sha256": "37a093d127b363436afff120588601132dcd6c2ba03f8e4d307c7d437873f0a2",
+    "doc_id": "9d34520f67ab62da",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2021/07/17-768x512.jpg": {
+    "content_sha256": "4b13ee1d21a2a8c3a0b8e9f3e897594dae50f0f1a0ac1100135cfef3e2031470",
+    "doc_id": "615c40a144c1aa63",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2021/07/18-768x512.jpg": {
+    "content_sha256": "155582f42bec789062db196a447b5725ecc2188bb57d6104eef6b044528cde91",
+    "doc_id": "f569340757e930c1",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2021/07/6-768x512.jpg": {
+    "content_sha256": "3e0631c252e2aaee878a6d79a5ce3e93021e3cc8815e0e057167ed231d971bda",
+    "doc_id": "6b34df6399b3581d",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2021/07/7-768x512.jpg": {
+    "content_sha256": "75d571c9cf98a46573e31c6518ae9fccd6f08f470b216cdd6c0f2ddd51355fac",
+    "doc_id": "f43dc8463023d7c3",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2021/07/8-768x512.jpg": {
+    "content_sha256": "17fada87d1e1fab04134e0ce1f2b32d94789856e4d8d6422434840e4ea832eab",
+    "doc_id": "ea6f86d5003f704b",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2021/07/DJI_0040-min-768x431.jpg": {
+    "content_sha256": "ff3c78bf5ec1af85994bb24d66383eca28e00e89fb6c1a34219ea4c5deed3afe",
+    "doc_id": "f2b2fea35c01c118",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2021/07/DJI_0044-min-1-768x431.jpg": {
+    "content_sha256": "7f95abe270ca6d1e1254cbe2b2b4863431ebd874747f282fe922095f646baf65",
+    "doc_id": "9ae3da8ac3eb3f42",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2023/08/2022030230.gif": {
+    "content_sha256": "e859b741758b6e82697c1bf397b93dfb1f0131cc3e2ba6114bbf8ac61a12260d",
+    "doc_id": "db21426b5b4e1108",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2023/08/new-gif-image-6.gif": {
+    "content_sha256": "99b08305203e8e8ad02aed968ce40a0ce68c8052abf5c08f7cf5b12a605119d1",
+    "doc_id": "050b67ef0abbe576",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2023/09/CBIT-LOGO.png": {
+    "content_sha256": "f562de1ee3e6cb997198076e9c4fffc3774762295df81e7ccf83c1eaa24ee488",
+    "doc_id": "23189acd44711008",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC07225-1024x683-640x480.jpg": {
+    "content_sha256": "3c0a0f246ecf4254101ea3634d792b1f834e3818d64f906e56cac530f3c614a0",
+    "doc_id": "b7e8bdcd2fc1a4e1",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC07287-1024x683-640x480.jpg": {
+    "content_sha256": "ece51d8b96ac64ff7cf4eb958c2366a132c1be554f5f49726ba7f68a3ba8379f",
+    "doc_id": "8d50b8c4053ef7a4",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC07294-1024x683-640x480.jpg": {
+    "content_sha256": "480b8444c543a51ddd14e50c1cd8be66b2309e8746279a4b0c650f0642f9df43",
+    "doc_id": "6da7f4a52d89a92b",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC07304-1024x683-640x480.jpg": {
+    "content_sha256": "854567537507503162144b2e91c2eceade9607d0e79c8d97c4082b4174eb61bd",
+    "doc_id": "a288cf68056057c4",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC07354-1024x683-640x480.jpg": {
+    "content_sha256": "2f42c6b0934e4f4cb44c8971aa0bb1a6c5d48c923ade77da51eb1c1c8bf1e31a",
+    "doc_id": "59f207f76be1ab61",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC07363-1-1024x683-640x480.jpg": {
+    "content_sha256": "04d5d52bcad8e1b1e4bfd12020b57b5812a1bfb61cb86821ea77a316423d217f",
+    "doc_id": "28621d8a5a184156",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC07370-1024x683-640x480.jpg": {
+    "content_sha256": "2d3251624ce3d4e07863ac1a72a16aa0762436748810c9aa0140094233426220",
+    "doc_id": "c9cc305c5fe7c731",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC08836-1024x683-640x480.jpg": {
+    "content_sha256": "c48277bd25c0b6055ce1bed282d49b7749ee5e7cbab2df3399253c40095a836f",
+    "doc_id": "d66a9082668a26e0",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC2954-1024x683-640x480.jpg": {
+    "content_sha256": "21fb3e6532f029b3d1b8883866259c591134b085037de1f8da1f343383b2d7bc",
+    "doc_id": "1ca9d1805ee38356",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC2987-1024x683-640x480.jpg": {
+    "content_sha256": "069644b97cc430de93e81cfd9f684d93b0d2f15086b02e6c3ecec8b3028e40c5",
+    "doc_id": "a4a7e48465fd0b58",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC2990-1024x683-640x480.jpg": {
+    "content_sha256": "90060299eba3494adc7027d3de609e8d5cb5e91409c966248e26f489da3d1ef4",
+    "doc_id": "9fa487b3648f7b2c",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC2999-1024x683-640x480.jpg": {
+    "content_sha256": "5e8c7e44d5d74fa62e81d8c579b3a60b50beb7836baec8e33dc1e8fa5ccee4c4",
+    "doc_id": "ce2fbf7bae526ae6",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC3018-1024x683-640x480.jpg": {
+    "content_sha256": "bf27374a5fd4bb33f346545704bb7f3cd15d5175bda4cce5688d2c882b74e4a3",
+    "doc_id": "a887d2424f119941",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC3058-1024x683-640x480.jpg": {
+    "content_sha256": "03336e28fd9370e47f2db1b425bf68d5b3c76453b10be59e770dd737efdda474",
+    "doc_id": "6a00018db1572823",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC3116-1024x683-640x480.jpg": {
+    "content_sha256": "023847e9c6ca28ecb118007a031c478a28857e1e17eea0ff785cee1625e2076c",
+    "doc_id": "362fdc68bb52b636",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC3163-1024x683-640x480.jpg": {
+    "content_sha256": "4949a993070f011b61b7aa765e5861b3d896b69fb2d09729614c8630358b3e3f",
+    "doc_id": "2490bc6569d80252",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC3214-1024x683-640x480.jpg": {
+    "content_sha256": "bf734b6fde86ff8668b5930e3d7d21d7adba57b0e43b9782378bcf8be9a7a063",
+    "doc_id": "0ad44485da5df023",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC3235-1024x683-640x480.jpg": {
+    "content_sha256": "037f0911b320ae4866d9dc8b168a28a216e5906bd42b0a21515efa4d5c860012",
+    "doc_id": "fa547f8cb5f2bb13",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC3286-1024x683-640x480.jpg": {
+    "content_sha256": "32e0af09596d42d06fefcb1b31f0b95ccb16aa1d7f28861827e9a0867170365e",
+    "doc_id": "b922b0866369f37c",
+    "kind": "image"
+  },
+  "image:https://www.cbit.ac.in/wp-content/uploads/2026/07/DSC3294-1024x683-640x480.jpg": {
+    "content_sha256": "cabd2b40a7ef6862d1bed9921699e40c1a0c1f6be3d643b358a14e5582c588d5",
+    "doc_id": "7ab47abc9c09aa0c",
+    "kind": "image"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_01_Students-Code-of-Conduct.pdf": {
+    "content_sha256": "67d6dbe85ba63a47401834985a9263999660dc951dc71a9f0eeffcd7f2debd7a",
+    "doc_id": "2758da450d508830",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_212-SC-ST-Cell-10.05.2025.pdf": {
+    "content_sha256": "07694c4944f05ebc7f03baa5d2043a275ce1cf1795fbbdff9d9e5869c4c038ce",
+    "doc_id": "55062d72a16f75c7",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_223-GRC-Students-10.05.2025.pdf": {
+    "content_sha256": "f1dc8f85efe6b477f79f5a137cf0ef7c73e1b6db024ccb2210d2924b5b6bb76b",
+    "doc_id": "b133d1e28a1c1c0f",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_Anti-Ragging-Committee-10.05.2025.pdf": {
+    "content_sha256": "fc929db2b3d1ec9529d0b1e90ad4c6f20b9abf2fefc3bf73f686350c3874c49a",
+    "doc_id": "4bd4907ee3b133dc",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_Application-for-Seminars.pdf": {
+    "content_sha256": "10e6ae6091344425fad2ffb32f51b55418564bf6b0cd7fe318d89fd7a9d892c4",
+    "doc_id": "b60dd6a402224858",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_GRC-Staff-10.05.2025.pdf": {
+    "content_sha256": "8829dd0bb6c21de2d985b4028d74bb57da1dd8ffb3d2f09ac05608d0f97342bd",
+    "doc_id": "0e2132ea07b90088",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_Human-Resources-Policy-Manual-04.12.2024.pdf": {
+    "content_sha256": "4968cdc75e45f1df3eb2427ad42ddb3ff810208d29fcf2ac7c6d3698d95c27d5",
+    "doc_id": "5ba2673d796b7b18",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_Institue-Industry-cell-10.05.2025.pdf": {
+    "content_sha256": "122cc233f45f465eb934de9e68c81fc0013e5be05f2be588e7518300c27621f5",
+    "doc_id": "a174b421a6476ca3",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_Internal-Complaints-Committee-10.05.2025.pdf": {
+    "content_sha256": "1fa228e237c819b8fcbcff7b1b78967064cde71a2d743fd78accba496eaf239a",
+    "doc_id": "f33b067f711bf5ec",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_Leave-Rules.pdf": {
+    "content_sha256": "6850277993b7d0143b70804436d5cfe4d9c0adaf2c62ba0a95e1b7e8ef1bbbbc",
+    "doc_id": "c3a86788bb372427",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_NBA-NAAC-Accreditation-Status-13.07.2026.pdf": {
+    "content_sha256": "379494ae413a3bf7dc0c415ff850bf03063aaf3076ff7b827da7cfb023ccfb7a",
+    "doc_id": "6dd020049a9ab731",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_Non-Teaching-Appraisal-Hand-Book-CBIT.pdf": {
+    "content_sha256": "8c108d24c42cadfbf5a1526e8b76bbdb785e25b9cc7f922fa5946c9ad8d5d1a2",
+    "doc_id": "653f9201cb0ffbcd",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_Ph.D.-Enrolled-and-Awarded.pdf": {
+    "content_sha256": "da905dddb04dedecc902c7ca58aded51bbd61e698a415cd028a4bb070a3979fa",
+    "doc_id": "5485cd65d3688ac2",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_Policy-Doc-Green-Campus-CBIT-4-1.pdf": {
+    "content_sha256": "2ede314e0760718b7ce6a69ef4df4b7eae146fcf58609e057e5eb0101941d966",
+    "doc_id": "bfb2271dfcd07463",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2019_04_Students-Counselling-Committee-10.05.2025.pdf": {
+    "content_sha256": "ac239acf2c497f5531ee4b13f43874666d14a8ec3af13447d12b511a1e0dba64",
+    "doc_id": "7105f6b576cd59ee",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2021_04_Information-Academics-Examinations-Promotion-Rules-Circular..pdf": {
+    "content_sha256": "f289de9e6eb6f5fe10b4e1e16f05e63306d3f68b2dbe61016ce35faceafc5d7e",
+    "doc_id": "cbcdfd9ff0818408",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2021_07_Admissions-into-BE-BTech-courses-for-Working-Professionals-2026-2027.pdf": {
+    "content_sha256": "eb1e78f50e1e2fb50998725717253c9dd83645a3d480d0fa3dce6b507764e32f",
+    "doc_id": "4bcb12b4c5ee5978",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2026_03_AICTE_Mandatory-Disclosure-Final_CBIT2026.pdf": {
+    "content_sha256": "83f7e1edad05a34cce6f11364c07b65e663aca4033d2e227145e4a1ba20feb3c",
+    "doc_id": "26209541638cff43",
+    "kind": "pdf"
+  },
+  "pdf:www.cbit.ac.in_wp-content_uploads_2026_08_Rolling-Advertisement-_-01.08.2026-...pdf": {
+    "content_sha256": "6399e99acc28c66efb354622ec1586a7dcec32f6411f23920ad001efc066aea8",
+    "doc_id": "98b70b2d55c6e782",
+    "kind": "pdf"
+  },
+  "text:alumni.cbit.ac.in.txt": {
+    "content_sha256": "3635d56d6bff15ba2bc4677f74463f4e8626527d36971c869ac19dc6d18c2e61",
+    "doc_id": "2c2cb69cf3ce3c20",
+    "kind": "text"
+  },
+  "text:cbit.ac.in_about_post_financial-report.txt": {
+    "content_sha256": "5ea22a83a76b0a70593bac0339cfc66bb3b085046faba29f6d7ea3f44e065836",
+    "doc_id": "76f24d72ecd4af64",
+    "kind": "text"
+  },
+  "text:cbit.ac.in_about_post_governing-body.txt": {
+    "content_sha256": "665e17f0e14f6b55d30ef346677db824bccbe36c64abe5c5a31e09a0ddee53ce",
+    "doc_id": "a355b8ee659ddc80",
+    "kind": "text"
+  },
+  "text:cbit.ac.in_current_students_aec_coe.txt": {
+    "content_sha256": "bba36623bdcf1529661fcae55cb2c823cc586448934c9a984ad745543445f06f",
+    "doc_id": "c34480f897865431",
+    "kind": "text"
+  },
+  "text:cbit.ac.in_current_students_aicte-mandatory-info.txt": {
+    "content_sha256": "ce36d08868393cba8a5907043469a4dc42807641b69d743c1f3ca070e943ad48",
+    "doc_id": "5afa07cd24d462d9",
+    "kind": "text"
+  },
+  "text:cbit.ac.in_current_students_finance-committee-meeting-minutes.txt": {
+    "content_sha256": "8b1952023d67843cb4f1621d0ab85b396d270e7b69ac2532214320ac4549c0d9",
+    "doc_id": "1c6cfccea7ef34f7",
+    "kind": "text"
+  },
+  "text:cbit.ac.in_current_students_governing-body-meeting-minutes.txt": {
+    "content_sha256": "012ceb70dc168a4151a8f65685c87093bd17f42bf05bf0ecc81d097240101fba",
+    "doc_id": "96e9306beadf2877",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in.txt": {
+    "content_sha256": "90287eb5a737ad61d692a94774439505a6f8c937260c22f3fa2fdd91c84df84d",
+    "doc_id": "8cecc88d60e88b3c",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_683.txt": {
+    "content_sha256": "a8b3bc613e2377a97ebf8047beb21f9b1fe2535de1c864c89409ab0f1c8d66ab",
+    "doc_id": "77fd62128ce231da",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_about.txt": {
+    "content_sha256": "0d26f15bed338ef5e6e5148f7d04033da6896a495294c489585b0cfe6c46ca0e",
+    "doc_id": "f0efab5272663a85",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_about_target_.txt": {
+    "content_sha256": "936acd998a9b512c54b0b94de9ce3a447ced9962a06c73920fd71da8a4dd4226",
+    "doc_id": "8124814d04f0972b",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_academic-approvals.txt": {
+    "content_sha256": "d195e42e77297fd48eb0ba22c64913d137d40d2b2f9efba71b2ca44bb51fa4eb",
+    "doc_id": "5fc672ee5f58eb47",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_cbit-strategic-plan.txt": {
+    "content_sha256": "96af45f7891b98b0839dd2352bc8437abe99ef64367de7cc30e3602eb4cb16f3",
+    "doc_id": "3b884584f4fb13e5",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_iqac-objectives.txt": {
+    "content_sha256": "2132e39542ce5729bae0156837266a04b7496eef8565f2cac29d8ef8e2e78c95",
+    "doc_id": "24cadb7a8df192a6",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_naac.txt": {
+    "content_sha256": "db4063f110faf0373e1ea905b3853afd324c8e95176489de772fb0742a19e5c3",
+    "doc_id": "1dd17eb3edd3a755",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_nba-dcp.txt": {
+    "content_sha256": "9979a0c6eab8b354f9c7bc7585bb0cccd30d4d65f8d350c29bb439671e1d9db7",
+    "doc_id": "7525d5ea61995e7f",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_nirf.txt": {
+    "content_sha256": "53754a22625941765d613bb3dd962b80398169edec913484a254870312d875c5",
+    "doc_id": "52c8b9b8322129a5",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_purchase-office.txt": {
+    "content_sha256": "24596a2b91dc58e307358a18cf2fa4a5c0b79f272314de35f6190d359a148506",
+    "doc_id": "bb9f58eba0eb73d4",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_scholarship.txt": {
+    "content_sha256": "111c6848aaba7ba3eb2c8109584b8988de04a4a192c69d8fa727725e678db6b0",
+    "doc_id": "72cfb66f45b54843",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_about_post_tuition-fee-circulars.txt": {
+    "content_sha256": "ae16495e4c04933a81b599a8f3a623606abf361d818379ec44de9d7a106bc5e9",
+    "doc_id": "39f9dd2c7ab60518",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_academic_post_academic.txt": {
+    "content_sha256": "19ee33d493bd3da21a1600ab637800cbff0c77fa2f105a55dce18c54f155b8c2",
+    "doc_id": "2ec3598767fad668",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_admission_post_admissions.txt": {
+    "content_sha256": "5d8c81c36fae574e518478803348be24313a8a5da1223551b201796ee4dcaac8",
+    "doc_id": "812a76f273feabc8",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10008.txt": {
+    "content_sha256": "96928df5048c669d2b381e64b3af6480e04b65887c17eb5f9dcdc07ea0e2a107",
+    "doc_id": "96132371c4f9174f",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10032-2.txt": {
+    "content_sha256": "c24b5e6f52a2be4a0c04effd8baef766b98c6111b26e98766bad6a2f93ac8928",
+    "doc_id": "0824fc21140a3837",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10032.txt": {
+    "content_sha256": "4c2febd82be0612e778691627b9c6e040bdc8021eef0fa04e11a583ca8b10850",
+    "doc_id": "6b246973e2e51921",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10048.txt": {
+    "content_sha256": "a92d851321b5882ff29a2ab7b803b56df6b3a60b0d5542f5674c0d41b7a217a3",
+    "doc_id": "5e4f9c7addbdf928",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10049.txt": {
+    "content_sha256": "a4cb62e564248004ca8f62237f741eeaaf253bc9cb1062010300dfbbc5aaefe0",
+    "doc_id": "50ee95208902e675",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10050.txt": {
+    "content_sha256": "a2f879c595a9fd2df9cf9add58d50861eddfa8316502185ffacde1c7c434e9d4",
+    "doc_id": "5c28d128cae2d9f5",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10051.txt": {
+    "content_sha256": "64f47941fee6681d72df30911c7c2881f8b39ddf601c6624ce022b030590ca97",
+    "doc_id": "03fe9424f1b394ec",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10055.txt": {
+    "content_sha256": "e6831eafbe9e799ee85b5fd80c06bba85fa565f020b4488c47a1f36df6f100da",
+    "doc_id": "2f45d3439e216584",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10057.txt": {
+    "content_sha256": "5ee64f36d9c3ca8df29e95a386d6acdb9075ed219dc9db468a9ba541ceb2d79e",
+    "doc_id": "f2434fb4f73a6569",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10058.txt": {
+    "content_sha256": "3f54517a6ee0e5314957cbf8d6bdb79a144111f364bc25aa3c2324d122f301ac",
+    "doc_id": "d0efbb151ad3fc1e",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10084.txt": {
+    "content_sha256": "f2ae05af05689cbda60e2ca1af51e49f275bc190e870053cc23eb555e77363e8",
+    "doc_id": "fdee72800691f179",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10085.txt": {
+    "content_sha256": "c94e74bdad115efec02c66dba09bf0c37ed9b1bd1cf8c7a469474c997fb70acb",
+    "doc_id": "a0f811e8942cd06e",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10086.txt": {
+    "content_sha256": "591d6371d3c531cab304d49359cce1019c3f7e17d30b85a017534b847eb720fa",
+    "doc_id": "9c5f507897008240",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10087.txt": {
+    "content_sha256": "122c6de9c99e3098c3c05e2903763bdf73d2a785f60fcf9bd6637103edd8da01",
+    "doc_id": "184fd4b89946b9aa",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10088.txt": {
+    "content_sha256": "14342eb4419a399dd32e1747e235ca6db88e92f157b594bf25d8396eee78ddc7",
+    "doc_id": "cefef54f4f8e87f2",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10092.txt": {
+    "content_sha256": "68b2d8eb4bd0a4d8a052336fa6a97d93bcb1bbe755872e7373f91f2a619be7d8",
+    "doc_id": "ddb96d40fec8b3ff",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10096.txt": {
+    "content_sha256": "a5fcdba231fe31d016f6d7a4ea8730031d7ad3b4a763215bb21b39dd9d4c4bdf",
+    "doc_id": "fc52e094fdfe6c5d",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10097.txt": {
+    "content_sha256": "ab3db30e47e33134dc7ccc42213f73613029bd5c669d2262cdff0c3289066c16",
+    "doc_id": "256f05d171cefc77",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10101.txt": {
+    "content_sha256": "b70761b6ed7d6591da7164a1d1b0dfd82731c1bd72d3132e17dc0905d515fd95",
+    "doc_id": "69d67619edd7987f",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10112.txt": {
+    "content_sha256": "23e0a44ccf391b80d89122fade11e6ebde301a77ab346e45924c7ce21daa4ccc",
+    "doc_id": "eab6e9c3a8a51ba2",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10121.txt": {
+    "content_sha256": "b3f6ec9377f9014cf744b9c1863bba848b8fda9c47ca0976a21d096b299e12b4",
+    "doc_id": "52c0514564cb0761",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10131.txt": {
+    "content_sha256": "111b2373ebee3516fffa73f0680ee9b6e0211839ee94607bac7df39b7e89f5e7",
+    "doc_id": "a451ccb8b64a292a",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10132.txt": {
+    "content_sha256": "8cebdf4170b9771d5d22fe36ca6505d6e64199bb9e798cf82d2f6dfcfbbe2db5",
+    "doc_id": "3b14ff9501ef9439",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10133.txt": {
+    "content_sha256": "1511322c3b090a5d0a40b1e58b2555edfbcab19ada4cb4e1e2379c8e5aec939a",
+    "doc_id": "efdbbe24559081c9",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10134.txt": {
+    "content_sha256": "e83f6071e29d2c8694fbdf6cb641095d031438a7fb45bf39ac51d88bb35c83aa",
+    "doc_id": "79fbb2fd83e91cf0",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10135.txt": {
+    "content_sha256": "b82f64ab93a369f770e48dab4f7858ea443a8316e67d18babfde36ea8c7dc613",
+    "doc_id": "850415cc17e816c3",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10136.txt": {
+    "content_sha256": "56f180a1f5597376fbd6f3ea75651c5ec6d8ab8fa43e713282da7692c2affef0",
+    "doc_id": "0317bfd8b34db394",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10141.txt": {
+    "content_sha256": "fc650c87410bb087ee93160513e87ad7123668096b54ce43789ea2e8e5b69814",
+    "doc_id": "4a3c7f4e8f85efc4",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10144.txt": {
+    "content_sha256": "bafe752c6dfd9a370dda53bb4cf8b8a5324f6c9060bdc34e2e61a26a703a00d0",
+    "doc_id": "868e37256ffc5982",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10145.txt": {
+    "content_sha256": "28cc73dd7ea218c84d25982a782102115594a0a5fc457a2b896878318cace3dc",
+    "doc_id": "a755524b61f825b8",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10150.txt": {
+    "content_sha256": "79589b7768dd9cde9d28b3cc5ed1ab3834483ed63d67dad694b8b2e067a359a8",
+    "doc_id": "95d6db81bbe76b8f",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10151.txt": {
+    "content_sha256": "4c5078537aea536115eaa7ba921c9aa32d1ddd494f337261fdca3edae54e396b",
+    "doc_id": "dc3d82e123c31485",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10152.txt": {
+    "content_sha256": "bacbfb46bde7e2ec936ce748ab6744594212c060a836d34e279a781ce7941925",
+    "doc_id": "b1183453f30cab73",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10181.txt": {
+    "content_sha256": "70a745e12bccfd62fe44c94cb67990dbabe281df3485830f376225868be8afde",
+    "doc_id": "98b6fa576465c98a",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10199.txt": {
+    "content_sha256": "f55ab4e00530ddafecd0e7b4ee905eeddb61ddb3ec79a090ebda4d2e0978473f",
+    "doc_id": "cbb68f482d182f84",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10342.txt": {
+    "content_sha256": "f5e0237a6a9f8d4f969cff7a1809ab6437d5629d7deae38358ca69e245f6c297",
+    "doc_id": "79972b733a96c321",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10388.txt": {
+    "content_sha256": "5882b8f136395bbc1d96c2615c679db2a8f03bcaaa9961353ae0fbfa4d9215fa",
+    "doc_id": "ab5d07e6a7caeae5",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10506.txt": {
+    "content_sha256": "f4505aa62fc72f7463dc4f8f67d3df4660789972f13783ae3e36f795d08df3eb",
+    "doc_id": "4278d9acf914eb24",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10530.txt": {
+    "content_sha256": "3edaa9a0b4161f8652e7515f2a9c461e79bb22ec1b36461b48b1ea39bf185287",
+    "doc_id": "e777d2903a332186",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10563.txt": {
+    "content_sha256": "8d35446122bc338813af18ba524bac0a6989360f3c7492507c2a5970a0099095",
+    "doc_id": "d3b2588b845c4d96",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_10623.txt": {
+    "content_sha256": "b6a92fc06d6c835bb448e1c9092fa743c15eab3b5e903ec5892ee92324bbf652",
+    "doc_id": "960d957b738bbc66",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11109.txt": {
+    "content_sha256": "d486900b349b67a97c19e828e2c6e9bfbf8c5a4183470cf09e7fcc42b693b825",
+    "doc_id": "75688803b642ae6e",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11489.txt": {
+    "content_sha256": "4a0f48083dfd3995ab32d23257bd66e7c87bf113567a14f951b78a57f9610908",
+    "doc_id": "0a6abe6fea069b06",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11511.txt": {
+    "content_sha256": "faba5f50b163aeaebf85bcf7bee4fcee5659292bbec21afba039c89d5486c2c2",
+    "doc_id": "fac1a0d65ba418bc",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11530.txt": {
+    "content_sha256": "46e8e4db34cabb54fbf5a4e9789a0abdc48e8b896b6129c615cacfc0889bfbe7",
+    "doc_id": "8ccf9620b1e61678",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11570.txt": {
+    "content_sha256": "98ee5f4d195745da381f220b1d4db0808d67e45cd2b82df39562f69cc7987734",
+    "doc_id": "5e70bbb72af09711",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11591.txt": {
+    "content_sha256": "c1e96ed7a6f421d993bfe0c23348d89f8d744dd385a6fb8dae8a730be79afb34",
+    "doc_id": "aa2aa3270fbbba4d",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11612.txt": {
+    "content_sha256": "099ea1bfb7d897167171b8396e14b8a8cd0945d8f2cb8d98eefa0b2379ad8316",
+    "doc_id": "9ed05bdbcc34ec5f",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11635.txt": {
+    "content_sha256": "2d485321cfab5fc7fedc9b44391fcab7dddcc84684bb9d46cea5894badcbfe03",
+    "doc_id": "2d49eb2eab0cd6c0",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11745.txt": {
+    "content_sha256": "06717d77e54211c980d065ec608587be0c64e5c219fc540d83fe87215e47caea",
+    "doc_id": "23106b6bfc3992b8",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11849.txt": {
+    "content_sha256": "bfb9624a4f8fd045fc922e338fd5845549db187fc245f2e846a1d7e7be2bed72",
+    "doc_id": "5407c70876ac4375",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11883.txt": {
+    "content_sha256": "986bd34d367c66851814ee42138971f4df0321a2ce1f9be93b583ed2c5722ffd",
+    "doc_id": "bda0fd35c0b579cc",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11937.txt": {
+    "content_sha256": "9d30dfedf3c033fb0d53b85ba7953a1d07f8b0731b9e3122f16a0ce27c17066f",
+    "doc_id": "6ec1aae841cb5855",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_11975.txt": {
+    "content_sha256": "7de5b133824ea3298a7029f4b6b1aa2b2b9645482610da06a314ab97a9dabb1d",
+    "doc_id": "7d3e0c23cefe8edb",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_12011.txt": {
+    "content_sha256": "53597ec68c47e4e1c918158aaa0b2ffa0fa9497ecfd065f04cd33a6977ad701d",
+    "doc_id": "46f1be1375a0b0b8",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_12337.txt": {
+    "content_sha256": "ad9594086a33e3ebc3e915783bb06e5f5bf6a46995a132b0aabbf92239e71a9d",
+    "doc_id": "d210e365ff88f931",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_12643.txt": {
+    "content_sha256": "450260ab8fcdc17a43046969ac8948c86d525f243bd4f1a09dd11e63cbcbc8eb",
+    "doc_id": "7cfbc129b0f0abdb",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_12709.txt": {
+    "content_sha256": "6f407bbbd8efca2d27007237f6d1d411458bfba8ebea312b54198488d7edc37a",
+    "doc_id": "b36e622f9a3acb2e",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_8432.txt": {
+    "content_sha256": "d49198af892424e315cf58074d4294d3821b75451b10d8978373d2b35df4372d",
+    "doc_id": "03f189cd7a3e53da",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9345.txt": {
+    "content_sha256": "19c8d6fc84a96339396ab89df73b805ca98e52a3ed80da464081c848525427d1",
+    "doc_id": "a26770b6d124d89c",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9346.txt": {
+    "content_sha256": "06fe05594fe3822f45bd580f6d978b35266f1d3badabf65b43c80afb5527f32f",
+    "doc_id": "15ae3ed0753aa447",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9507.txt": {
+    "content_sha256": "088f79b509f6137d009c4dcdd97ccd8476d85500b01016c4098a5575b8a288c5",
+    "doc_id": "f7766507d5af4058",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9677.txt": {
+    "content_sha256": "99e19e3429130bbaf310cb27ac8a5a3e6a70dc4a47317943ed50fc34c5ab00f6",
+    "doc_id": "f23c9a8ac56fab69",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9716.txt": {
+    "content_sha256": "5c3e2844fd7e6e62da82796d8baf7e8045b6466df35af6b0aa9b26af1083a854",
+    "doc_id": "99bf6edb668ea786",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9717.txt": {
+    "content_sha256": "1cba9d898cf41a13770be8fcf8a02599133adecadd93682a4f3358f572c6adef",
+    "doc_id": "ab9695625b1991ef",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9736.txt": {
+    "content_sha256": "b695285c79ec9a89b973cf0acc91ffe0c7aa6b594f17737d8fb655516329ecf8",
+    "doc_id": "3c52c0293c433e5e",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9737.txt": {
+    "content_sha256": "e7d9dca3267f8276f72c7b6485a1db0c0eea21b6dc6a477db2aedeffc26bc293",
+    "doc_id": "103581263144bcff",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9768.txt": {
+    "content_sha256": "3736dfcbada22a7697ded8f80a814fc08613227fddc975b2a62ff36a75da0736",
+    "doc_id": "48a4acec862b15d7",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9833.txt": {
+    "content_sha256": "75ece0e3604da53a91bbb79adf8c3a779fd61fdb33f4d2bd38e66da02ee1b57d",
+    "doc_id": "a88480b5b11211fb",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9837.txt": {
+    "content_sha256": "023ac42281966d06a7a1de3215ae876f3ecfcbb97ef92df4fc7f4239fb9d6973",
+    "doc_id": "99736622037a836b",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9839.txt": {
+    "content_sha256": "d10f227113ad3c9c190c6ca54b5b810cd102a08065c7a83d27cc3a78ccfed67f",
+    "doc_id": "baf81fc5ca6c7bd8",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9982.txt": {
+    "content_sha256": "d9d71570a2cd90bb28d65d6a37fe9dc8026445a9346052176adb348dc09f6a62",
+    "doc_id": "0c1a61cda35ebc19",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9983.txt": {
+    "content_sha256": "0c1bf81cf5e084d92aed381c53026955b489161eb805787f6ba20068e2f3d816",
+    "doc_id": "c324a60581f73f21",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9984.txt": {
+    "content_sha256": "04433bfe0f07b62665272cb0d943971dd82cfcb4aea67039e03905aefdab9c97",
+    "doc_id": "3a412676741663ff",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_9991-2.txt": {
+    "content_sha256": "0b2414abc8d0bc60c5736c6e993b4f6be3be8fbc191926ebf613d724687be3b7",
+    "doc_id": "2007ae804da8de7d",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_anz-ppt-placement-circular-on-08-11-2021.txt": {
+    "content_sha256": "17af8b91930db2a2605478884dd167df027f6eb6ed7460695e2b88fdae0601e4",
+    "doc_id": "3a6a79d63b05ec96",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_anz-written-test-and-interviews-placement-circular-on-10-11-2021.txt": {
+    "content_sha256": "cb5d464322a5ade891acbeeb48b60666a6600bf60bfaa1b32a4cbde934b269ea",
+    "doc_id": "1b4e603cd7b3100f",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_barclays-ppt-online-exam-interviews-placement-circular-on-16-18-08-2022.txt": {
+    "content_sha256": "0ecddebdd40e987ed72db6a35e6509734acd57851a5947dd89f69f6b498411ee",
+    "doc_id": "5911406791275f04",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_beautifulcode-pptwritten-test-interviews-placement-circular-on-16-05-2022.txt": {
+    "content_sha256": "960c63eb7ffff371e933776b758261b535726419360c4ea2d7ee4abb5402be34",
+    "doc_id": "83613954bac588dd",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_blue-danio-sea-services-interview-placement-circular-on-03-05-2022.txt": {
+    "content_sha256": "31367cdc75b12080777bb8e525f9e34f93c9179bc6897a4053903b742fe07f2e",
+    "doc_id": "0d32f9e7fe5f55a4",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_dravin-engineering-private-limited-ppt-online-exam-interviews-placement-circular-on-29-.txt": {
+    "content_sha256": "491cc9163ba39396da586720ca50b1554a0222700691eddb41d4d82b5c162353",
+    "doc_id": "4bf702f89d14002e",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_hexagon-online-exam-placement-circular-on-29-09-2022.txt": {
+    "content_sha256": "f84d1b8057e27252b2b6fd965d16c5492aeeca8c66df61120a950c55a2e71a74",
+    "doc_id": "703e511803134ba8",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_industry-linkage-placement-information.txt": {
+    "content_sha256": "7bad53fcb7585a7f2cc821099be1aeff6d952abcb1f3b09457a5d10f7779e111",
+    "doc_id": "ac0a2055bd04c46b",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_invesco-online-exam-placement-circular-on-25-05-2022.txt": {
+    "content_sha256": "19172e14088ea5dfb51d43422dcbb5848875ec10009d6f36e4f15a58fdfbf68d",
+    "doc_id": "6ff5c7a00d6bc84a",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_invesco-online-interviews-circular-on-16-05-2022.txt": {
+    "content_sha256": "568c7522b8a54015696328eacdb5321c4fa7e2b85733287de5969cc9607a4fd7",
+    "doc_id": "7d8c4ac6e01714dc",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_itc-ltd-online-exam-placement-circular-on-24-05-2022.txt": {
+    "content_sha256": "bc2c479729202b24dea043daf873511f33545636b1c73b6dcc179e3b6b087699",
+    "doc_id": "bbbd85628683ec86",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_l-t-technology-services-hr-interviews-placement-circular-on-10-11-2021.txt": {
+    "content_sha256": "3c0978bbef79cb7f74359e94a810301bf7ed8f9794ee7e231f7ae6dfe1678105",
+    "doc_id": "d680eb1c777459cc",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_lt-technology-services-ltd-online-exam-placement-circular-on-24-05-2022.txt": {
+    "content_sha256": "fffb06ad0fa2ff9a47ffa0b09faefc1b7c3dd0ba2ff3303260a13e35aa087233",
+    "doc_id": "62d7ee5461fe9854",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_modak-ppt-placement-circular-on-29-09-2022.txt": {
+    "content_sha256": "cf7f9397f0ff2001af29a57d1f89d05398842aba103fe61dd93da230f9e0795f",
+    "doc_id": "771ce164919524d9",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_national-level-math-e-quiz-2021.txt": {
+    "content_sha256": "dee073bd46c69e8bd0738e73cd80e7c87b016bbe90b06181a9395750253c017c",
+    "doc_id": "9f354fbe19b57335",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_announcement_post_xit-solutions-interviews-placement-circular-on-10-11-2021.txt": {
+    "content_sha256": "27e0fa184bbbd7dc36a030ec10e712b882bf46f67a3602541bd3ddd3a8c81e3e",
+    "doc_id": "9d3623efa15416ef",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_campuslife_post_anti-ragging.txt": {
+    "content_sha256": "de3eb5b4d63d4f5a30ed6cf22671c97df64419da72b302e1124619bfe575963b",
+    "doc_id": "1de47bb3ad6f0de9",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_campuslife_post_campus-life.txt": {
+    "content_sha256": "33d5f080ae028b64d7c576d232276104e99659bb59f5a7eb4a4181e52a9bafd6",
+    "doc_id": "ef9de57904162dbd",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_campuslife_post_event-gallery.txt": {
+    "content_sha256": "0789dd520debefd23b8bf30eaffe2442bc000de0044857031f7eb3cb9d784d13",
+    "doc_id": "176aa195b65d992a",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_current_students_examination-notification.txt": {
+    "content_sha256": "113aab00bacb5a2c91b709151b8ceb6f300506d8e02840f05f62763b541086ef",
+    "doc_id": "340a8b5ae39f8611",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_current_students_facilities.txt": {
+    "content_sha256": "cc9bc4d6c9a46779b6318cb5544ee55a5de0e502bcd8b93469dfab28d7be48c9",
+    "doc_id": "3843e35253953a2c",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_current_students_recruitement-advertisement-2022.txt": {
+    "content_sha256": "43d0a77e1c9eaf4ce2a3ff332b5c48ecd8add2b81c58eed53b40ff7fed0ef84a",
+    "doc_id": "a5317dcb5cf0faeb",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_current_students_results.txt": {
+    "content_sha256": "dc3f988c67887a3621ea7a0402fed093efee3a1802bea5b88a60ae404bcdef42",
+    "doc_id": "0bc9d6d24723ac03",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_events_post_global-aurexis-summit-2026.txt": {
+    "content_sha256": "0ab38160303ab00af0023213deffcbb124037f5a6ee4d325fd9a8e50313697fb",
+    "doc_id": "d2e31681e846341a",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_events_post_icseed26.txt": {
+    "content_sha256": "4da24350561f418fd3ba8c0f4bf0355c768707d1778b0d99dc796e7a489a35e4",
+    "doc_id": "355e930ac6d3b7f9",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_events_post_national-level-value-added-course-on-aspen-plus-hands-on-process-simulation-and-chemical-proc.txt": {
+    "content_sha256": "59e95139df4c90259f7c819b5b6f7f856ba1aeb392e242409c378b728a3e7e3a",
+    "doc_id": "00941a961c1f5e9e",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_events_post_pre-conference-workshop-of-7th-congress-on-intelligent-systems-cis-2026.txt": {
+    "content_sha256": "92e744533bdafe2815b559edee19de8e37aa6eec97693a41a66ee4c2ee8e01a1",
+    "doc_id": "5cd6b2ede3444186",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_events_post_rcete-2026.txt": {
+    "content_sha256": "a5b761078904483b9941c5d86963e45b185a906f986344f7e84b2159c65083d1",
+    "doc_id": "cc41b72af19baf32",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_events_post_sasigd-2026.txt": {
+    "content_sha256": "6e82167ba3543ad5a0cf13a19d4417f98252a874ed1d2d0037edd0eb960b5ed1",
+    "doc_id": "bcb45b33ec891add",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_events_post_sttp-on-gnss-principles-data-processing-and-applications.txt": {
+    "content_sha256": "a672a9528fc743048fb73738ab9bc3039205cde803e6882afaf7f444f22dac76",
+    "doc_id": "83c42b826feb01bf",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_news_11624.txt": {
+    "content_sha256": "f58c0a37f8bb0825ce55e111b33c3c92804d53cb529084ab60fd74a3132bd745",
+    "doc_id": "f1078911a0c89652",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_news_2026-batch-students-placed-in-itc-with-ctc-9-lpa.txt": {
+    "content_sha256": "e8c9f548a72b012305087cb749227da9d045c1042e17d50801992b47eb1f427b",
+    "doc_id": "e37cf9d624623963",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_news_36828.txt": {
+    "content_sha256": "cfa0556e032f2a4fbcb6eddf44cfb158d49afe594e47ba6b962e216e4e2cc2cd",
+    "doc_id": "2bf0fdb11354aff3",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_news_80th-indipendence-day-2026cbit.txt": {
+    "content_sha256": "8dfeb565172594534bd82b999456a6d7fa69e721fecb29c1fc963de93bcc99a8",
+    "doc_id": "1ca69120ac13a807",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_news_mohammed-imaduddin-has-been-accepted-into-the-linux-foundation-mentorship-program.txt": {
+    "content_sha256": "450e36cd80ec9e82205cb3278657fb7894ea0cf48b0d2012101d02358bafdd3a",
+    "doc_id": "428c3019fa0bab64",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_placement_post_internship-guidelines.txt": {
+    "content_sha256": "baffc913a27ead39f5eea7e77cf01bffa47e76810f8b94d9589f3d964046626a",
+    "doc_id": "56386a8d3a8efd71",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_placement_post_placement.txt": {
+    "content_sha256": "da7e1f223523c3dd88518e0ca7da7cbca9afd5acc1d7cf2fc746d7271b7fdbe2",
+    "doc_id": "6fd99db0476605d3",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_about-re.txt": {
+    "content_sha256": "44232c61e08e167649d0e2686c4cc5809427419e62bb424c1159e030f944fbd3",
+    "doc_id": "2b5c176c12bd03bc",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_contact-us.txt": {
+    "content_sha256": "e1369afc230d95144971c6bbc7f1ca7c2798e8852bee144e31e4bb932e446f12",
+    "doc_id": "8e7c2577fefe1c97",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_departmental-research-committees.txt": {
+    "content_sha256": "19629856eb71177b6603634065342b2f515175e8ab327a970f664c4bff57fe67",
+    "doc_id": "1f41a5c0cbf14fcd",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_exp-3-1.txt": {
+    "content_sha256": "581cbbfff047f7d8ee9964049ddbd1ab5cd91b6c7e278860cb4809123605c3f8",
+    "doc_id": "94113b3add31c269",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_funded-projects.txt": {
+    "content_sha256": "ccbb86aa38771eb3cd4057e231bab4045a1fa9c566afd3f07bc23bdcbf3f47ef",
+    "doc_id": "50bc4137db56d7db",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_innovation-and-incubation.txt": {
+    "content_sha256": "640a9bbb829989f74005d9fccf3b2fce40819482c35a7acee568e5ab0fc7ac5b",
+    "doc_id": "d8afc703dc4c9c6d",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_ipr-patents.txt": {
+    "content_sha256": "096311f9d48a150b7fb21794035277e0e1aa5c688f9ccf33491ecfa0d80c285b",
+    "doc_id": "d74532a3b153a5c4",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_nisp.txt": {
+    "content_sha256": "959b1f3cfac60fc70680edf8b4086e7cb35c3684e0fdd607e50ef3382b541127",
+    "doc_id": "76c2bad7e237f66d",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_rd-policies.txt": {
+    "content_sha256": "7524014df79381a93eade076a8921d3a414d85befddee854086ce217ccfc1931",
+    "doc_id": "1575c6adf37882e6",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_re-infrastructure.txt": {
+    "content_sha256": "7c877872734f4c51a7e3407e8b63e005ce1574fda15149efeba27467b30756fb",
+    "doc_id": "0418473c5f9ebdbc",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_re-team.txt": {
+    "content_sha256": "2db1e4c419f3301078516f3c559ec660d6b041851f5b3b9709d965bd3034b403",
+    "doc_id": "3369f11542f5119d",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_recognized-research-centres.txt": {
+    "content_sha256": "c6058a50259703d95542aca7c2572895cc91bb970ed7af87c52436708f2698b8",
+    "doc_id": "c002bf88bac40ef0",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_recruitment-notifications.txt": {
+    "content_sha256": "4125334adf27a75bd8bf5a477bbea0bd160c09ea4f69a7dfccea35ab93673ba8",
+    "doc_id": "dda4bbe0aa4e3027",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_research_post_research-day.txt": {
+    "content_sha256": "6c7c3ee5815e99afaf91208c2c137f012bbca9700de0fdbce8271022d7d3c2db",
+    "doc_id": "56cf1b980a1ef91f",
+    "kind": "text"
+  },
+  "text:www.cbit.ac.in_social-media-cell.txt": {
+    "content_sha256": "afa71462ef354e4f1b427788de27fa73e421add7db441db37df84c63df8dc649",
+    "doc_id": "e4be5f69688edd68",
+    "kind": "text"
+  }
+}
