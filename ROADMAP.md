@@ -413,9 +413,14 @@ conflicts on Day 11 are how projects die.
 - **Conversation memory across sessions** — persist history per `user_id`.
 - **ERP automation** — Chapter 5's future scope, using the Playwright dependency
   that's already installed.
-- **Auto-refresh knowledge base** — scheduled re-scrape + incremental
-  re-ingest so the site stays current without an admin manually
-  re-running things. Full design: [docs/FUTURE_SCOPE_AUTO_REFRESH.md](docs/FUTURE_SCOPE_AUTO_REFRESH.md).
+
+## Auto-refresh knowledge base — done
+
+Scheduled re-scrape + incremental re-ingest so the site stays current
+without an admin manually re-running things — no longer a stretch goal,
+built. `.github/workflows/refresh_kb.yml` runs it weekly; full writeup
+(including a real scanned-PDF gap and a filename-vs-URL keying fix it
+surfaced) in [docs/FUTURE_SCOPE_AUTO_REFRESH.md](docs/FUTURE_SCOPE_AUTO_REFRESH.md).
 
 ## Going live
 

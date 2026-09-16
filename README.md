@@ -143,7 +143,9 @@ infrastructure (Render backend + Vercel frontend, alongside the Qdrant
 Cloud/Gemini/Cohere already used in dev): [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 Keeping the knowledge base current after that without manual re-ingestion
-is planned (not yet built) in [docs/FUTURE_SCOPE_AUTO_REFRESH.md](docs/FUTURE_SCOPE_AUTO_REFRESH.md).
+is handled by a weekly scheduled scrape-diff-reingest pipeline
+(`.github/workflows/refresh_kb.yml`) — see [docs/FUTURE_SCOPE_AUTO_REFRESH.md](docs/FUTURE_SCOPE_AUTO_REFRESH.md)
+for how it works and a real scanned-PDF/doc-identity gap it surfaced.
 
 ---
 
